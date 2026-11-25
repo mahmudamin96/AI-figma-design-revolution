@@ -1,0 +1,1932 @@
+<meta charset="utf-8">
+<title>Claude Code Future Web Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: fixed 1920x1080 stage scaled to fit the screen; dark charcoal ground, teal pixel-grid light, glass cards (from the NeuroZ inspiration deck). */
+:root {
+  color-scheme: dark;
+  --bg: #131517;
+  --bg-raise: #1a1d20;
+  --surface: rgba(255, 255, 255, 0.045);
+  --surface-hi: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.11);
+  --line-hi: rgba(255, 255, 255, 0.2);
+  --fg: #f2f5f5;
+  --muted: #a4adb0;
+  --dim: #6f797d;
+  --accent: #5cc8d6;
+  --accent-deep: #1e5a68;
+  --accent-soft: rgba(92, 200, 214, 0.14);
+  --accent-ink: #062a31;
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ---------- stage ---------- */
+#viewport { position: fixed; inset: 0; background: var(--bg); }
+.deck {
+  position: absolute; left: 50%; top: 50%;
+  width: 1920px; height: 1080px;
+  transform-origin: center center;
+  transform: translate(-50%, -50%) scale(0.5);
+  background: var(--bg);
+  overflow: hidden;
+}
+.slide {
+  position: absolute; inset: 0;
+  padding: 114px 120px 96px;
+  opacity: 0; visibility: hidden;
+  transition: opacity .45s ease, visibility 0s linear .45s;
+  display: flex; flex-direction: column;
+}
+.slide.is-active { opacity: 1; visibility: visible; transition: opacity .45s ease; z-index: 2; }
+.s-head {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 18px; color: var(--fg); letter-spacing: -0.2px; height: 26px; flex: none;
+  position: relative; z-index: 3;
+}
+.s-head b { font-weight: 600; }
+.s-foot {
+  position: absolute; left: 120px; right: 120px; bottom: 48px;
+  display: flex; justify-content: space-between;
+  font-family: var(--f-mono); font-size: 15px; color: var(--dim); letter-spacing: .5px;
+  z-index: 3;
+}
+.mark { display: inline-grid; grid-template-columns: repeat(2, 9px); gap: 3px; }
+.mark i { width: 9px; height: 9px; border-radius: 2px; background: var(--fg); display: block; }
+.mark i:nth-child(2) { background: var(--accent); }
+.mark i:nth-child(3) { opacity: .45; }
+
+/* ---------- type ---------- */
+.eyebrow {
+  font-family: var(--f-mono); font-size: 17px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--accent);
+}
+h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
+h1 { font-size: 104px; line-height: 1; letter-spacing: -3.5px; font-weight: 700; }
+h2 { font-size: 66px; line-height: 1.04; letter-spacing: -2.4px; font-weight: 700; }
+h3 { font-size: 30px; line-height: 1.15; letter-spacing: -0.8px; font-weight: 600; }
+p { margin: 0; }
+.lead { font-size: 26px; line-height: 1.5; color: var(--fg); max-width: 34em; }
+.body { font-size: 22px; line-height: 1.55; color: var(--muted); }
+.small { font-size: 18px; line-height: 1.5; color: var(--muted); }
+.mono { font-family: var(--f-mono); }
+.accent { color: var(--accent); }
+
+/* ---------- shared components ---------- */
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.02));
+  border: 1px solid var(--line);
+  border-radius: 22px;
+}
+.pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  border: 1px solid var(--line-hi); border-radius: 999px;
+  padding: 8px 22px; font-size: 20px;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--f-mono); font-size: 15px; letter-spacing: .3px;
+  padding: 6px 12px; border-radius: 8px;
+  background: var(--surface-hi); color: var(--fg); border: 1px solid var(--line);
+}
+.chip.on { background: var(--accent-soft); border-color: rgba(92,200,214,.45); color: var(--accent); }
+.btn {
+  appearance: none; border: 1px solid var(--line-hi); background: var(--surface);
+  border-radius: 12px; padding: 12px 20px; font-size: 18px; cursor: pointer;
+  transition: background .2s, border-color .2s, transform .2s;
+}
+.btn:hover { background: var(--surface-hi); border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.rows > * { padding: 20px 0; border-bottom: 1px solid var(--line); }
+.rows > *:last-child { border-bottom: 0; }
+.row-t { font-family: var(--f-display); font-size: 26px; font-weight: 600; letter-spacing: -.5px; margin-bottom: 6px; }
+pre.code {
+  margin: 0; font-family: var(--f-mono); font-size: 17px; line-height: 1.6; color: #d7e2e4;
+  background: #0d0f11; border: 1px solid var(--line); border-radius: 16px; padding: 22px 26px;
+  white-space: pre; overflow: hidden;
+}
+.code .k { color: var(--accent); }
+.code .s { color: #e9c98a; }
+.code .c { color: var(--dim); }
+.code .n { color: #b7a6ff; }
+.live-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--f-mono); font-size: 14px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent);
+}
+.live-tag::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft); animation: blink 1.6s infinite;
+}
+@keyframes blink { 50% { opacity: .35; } }
+.ic { width: 30px; height: 30px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- pixel grid light (from inspiration cover) ---------- */
+.pixels {
+  position: absolute; display: grid; pointer-events: none;
+  grid-template-columns: repeat(var(--cols), 1fr); gap: 0;
+}
+.pixels i { display: block; aspect-ratio: 1; background: var(--accent); border-radius: 2px; }
+.bars { position: absolute; top: 0; bottom: 0; right: 0; display: flex; pointer-events: none; }
+.bars i { display: block; width: 142px; height: 100%; }
+
+/* ---------- 1 cover ---------- */
+#s-cover .cover-copy { position: relative; z-index: 3; margin-top: 80px; max-width: 1000px; display: flex; flex-direction: column; gap: 28px; }
+#s-cover h1 span { color: var(--accent); }
+#cover-canvas { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 1; }
+#cover-pixels { opacity: .55; }
+#s-cover .cover-bottom .wordmark { display: none; }
+#cover-shade { position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(90deg, rgba(19,21,23,.94) 0%, rgba(19,21,23,.78) 34%, rgba(19,21,23,0) 58%); }
+#floor-tag {
+  position: absolute; left: 1400px; top: 500px; z-index: 4;
+  transform: translate(18px, -50%);
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 20px 8px 8px; border-radius: 999px;
+  background: rgba(13,15,17,.8); border: 1px solid rgba(92,200,214,.6);
+  color: var(--fg); font-size: 18px; cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(6px); transition: background .2s, border-color .2s;
+}
+#floor-tag::before { content: ""; position: absolute; left: -18px; top: 50%; width: 18px; height: 1.5px; background: var(--accent); }
+#floor-tag b { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-size: 19px; box-shadow: 0 0 0 0 rgba(92,200,214,.6); animation: tagPulse 2s infinite; }
+#floor-tag:hover, #floor-tag.hot { background: rgba(30,90,104,.85); border-color: var(--accent); }
+@keyframes tagPulse { 70% { box-shadow: 0 0 0 14px rgba(92,200,214,0); } 100% { box-shadow: 0 0 0 0 rgba(92,200,214,0); } }
+#inside-ui { position: absolute; left: 120px; bottom: 110px; z-index: 4; display: flex; flex-direction: column; gap: 20px; max-width: 760px; text-shadow: 0 2px 18px rgba(0,0,0,.7); }
+#inside-ui h2 { font-size: 80px; }
+@media (prefers-reduced-motion: reduce) { #floor-tag b { animation: none; } }
+#s-cover .cover-bottom { position: absolute; left: 120px; right: 120px; bottom: 96px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 3; }
+.wordmark { display: flex; align-items: center; gap: 18px; font-family: var(--f-display); font-weight: 700; font-size: 64px; letter-spacing: -2px; }
+.wordmark .mark { grid-template-columns: repeat(2, 20px); gap: 6px; }
+.wordmark .mark i { width: 20px; height: 20px; border-radius: 5px; }
+
+/* ---------- 2 agenda ---------- */
+.agenda { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+.agenda .glass { padding: 30px 32px 34px; display: flex; flex-direction: column; gap: 14px; min-height: 250px; }
+.agenda .num { font-family: var(--f-mono); color: var(--accent); font-size: 18px; }
+
+/* ---------- 3 shift ---------- */
+.vs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.vs .glass { padding: 34px 36px; }
+.vs h3 { text-align: center; color: var(--muted); font-weight: 500; font-family: var(--f-body); font-size: 28px; letter-spacing: -.5px; margin-bottom: 10px; }
+.vs .after { background: linear-gradient(180deg, rgba(92,200,214,.12), rgba(92,200,214,.02)); border-color: rgba(92,200,214,.35); }
+.vs .after h3 { color: var(--accent); }
+.vs .rows > * { font-size: 21px; line-height: 1.45; color: var(--muted); padding: 16px 0; }
+.vs .after .rows > * { color: var(--fg); }
+
+/* ---------- 4 what is claude code ---------- */
+.surfaces { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.surfaces .glass { padding: 26px 26px 30px; display: flex; flex-direction: column; gap: 12px; }
+.surfaces .glass svg { color: var(--accent); }
+
+/* ---------- 5 loop + terminal ---------- */
+.steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.step { padding: 22px 22px 24px; position: relative; }
+.step .num { font-family: var(--f-mono); color: var(--accent); font-size: 16px; margin-bottom: 10px; display: block; }
+.step h3 { font-size: 26px; margin-bottom: 8px; }
+.terminal { border-radius: 18px; background: #0b0d0f; border: 1px solid var(--line); overflow: hidden; }
+.terminal .bar { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); font-family: var(--f-mono); font-size: 14px; color: var(--dim); }
+.terminal .bar i { width: 12px; height: 12px; border-radius: 50%; background: #2c3236; display: block; }
+.terminal .screen { padding: 22px 26px; font-family: var(--f-mono); font-size: 19px; line-height: 1.75; color: #cfdadc; }
+.terminal .screen .p { color: var(--accent); }
+.terminal .screen .ok { color: #7fd8a4; }
+.terminal .screen .d { color: var(--dim); }
+
+/* ---------- 6 superpowers hex ---------- */
+.hexmap { position: relative; width: 720px; height: 720px; flex: none; }
+.hexmap svg.links { position: absolute; inset: 0; }
+.hex {
+  position: absolute; width: 170px; height: 148px;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  background: var(--line-hi);
+  display: grid; place-items: center;
+}
+.hex > div {
+  position: absolute; inset: 1.5px;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  background: linear-gradient(180deg, #2a2f33, #1b1f22);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--f-mono); font-size: 15px; color: var(--fg);
+}
+.hex svg { color: var(--muted); }
+.hex.core { width: 230px; height: 200px; background: rgba(92,200,214,.6); }
+.hex.core > div { background: radial-gradient(circle at 50% 35%, #2b7f8f, #123c46); font-family: var(--f-display); font-size: 26px; font-weight: 700; letter-spacing: -.5px; }
+.hex.core svg { color: #e7fbfd; width: 44px; height: 44px; }
+.powers .row-t { font-size: 24px; display: flex; gap: 14px; align-items: baseline; }
+.powers .row-t .mono { font-size: 15px; color: var(--accent); font-weight: 400; letter-spacing: .5px; }
+.powers > * { padding: 15px 0; }
+
+/* ---------- 7 tools ---------- */
+.tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.tool { padding: 26px 28px 28px; display: flex; flex-direction: column; gap: 12px; }
+.tool .top { display: flex; justify-content: space-between; align-items: baseline; }
+.tool h3 { font-size: 30px; }
+.tool .maker { font-family: var(--f-mono); font-size: 14px; color: var(--dim); }
+.tool .kv { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; font-size: 18px; line-height: 1.45; }
+.tool .kv dt { color: var(--dim); font-family: var(--f-mono); font-size: 14px; letter-spacing: 1px; text-transform: uppercase; padding-top: 3px; }
+.tool .kv dd { margin: 0; color: var(--muted); }
+.tool.hl { background: linear-gradient(180deg, rgba(92,200,214,.14), rgba(92,200,214,.03)); border-color: rgba(92,200,214,.4); }
+.tool.hl .kv dd { color: var(--fg); }
+
+/* ---------- 8 pipeline ---------- */
+.flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; align-items: stretch; margin-top: 8px; }
+.flow .stage { padding: 30px 26px; position: relative; display: flex; flex-direction: column; gap: 14px; border-left: 1px solid var(--line); }
+.flow .stage:first-child { border-left: 0; padding-left: 0; }
+.flow .stage .num { font-family: var(--f-mono); font-size: 16px; color: var(--accent); }
+.flow .stage .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.flow .stage.main h3 { color: var(--accent); }
+.flowline { height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--accent-deep), var(--accent)); margin-top: 18px; transform-origin: left center; }
+
+/* ---------- UX process ---------- */
+.ux-steps { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; margin-top: 70px; }
+.ux-steps .glass { padding: 24px 20px 22px; display: flex; flex-direction: column; gap: 10px; min-height: 360px; }
+.ux-steps .num { font-family: var(--f-mono); color: var(--accent); font-size: 15px; }
+.ux-steps h3 { font-size: 25px; }
+.ux-steps .chip { margin-top: auto; align-self: flex-start; font-size: 13px; }
+.ux-steps .hl { background: linear-gradient(180deg, rgba(92,200,214,.16), rgba(92,200,214,.03)); border-color: rgba(92,200,214,.45); }
+
+/* ---------- research insight ---------- */
+.insight { padding: 30px 32px; display: flex; flex-direction: column; gap: 16px; }
+.insight h3 { font-size: 30px; }
+.insight blockquote { margin: 0; padding-left: 18px; border-left: 3px solid var(--accent); font-size: 21px; line-height: 1.5; color: var(--fg); font-style: italic; }
+.ins-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.ins-rec { border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 6px; font-size: 19px; }
+
+/* ---------- figma foundations ---------- */
+.fig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-content: start; margin-top: 30px; }
+.fig-grid .glass { padding: 26px 26px 28px; display: flex; flex-direction: column; gap: 12px; }
+.fig-grid svg { color: var(--accent); }
+.fig-grid h3 { font-size: 25px; }
+
+/* ---------- tools 4 col ---------- */
+.tools-4 { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.tools-4 .tool { padding: 22px 22px 24px; gap: 10px; }
+.tools-4 .tool h3 { font-size: 25px; }
+.tools-4 .tool .kv { grid-template-columns: 1fr; gap: 2px; font-size: 17px; }
+.tools-4 .tool .kv dd { margin-bottom: 8px; }
+
+/* ---------- 9 three.js demo ---------- */
+.demo-split { display: grid; grid-template-columns: 640px 1fr; gap: 64px; flex: 1; min-height: 0; margin-top: 40px; }
+.demo-box { position: relative; border-radius: 24px; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(circle at 50% 40%, #1d3238 0%, #121618 70%); }
+#three-canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+#three-canvas:active { cursor: grabbing; }
+.demo-box .hud { position: absolute; left: 24px; top: 22px; right: 24px; display: flex; justify-content: space-between; z-index: 2; pointer-events: none; }
+.demo-box .ctrl { position: absolute; left: 24px; bottom: 22px; right: 24px; display: flex; gap: 10px; flex-wrap: wrap; z-index: 2; }
+.fallback { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 20px; padding: 40px; text-align: center; }
+
+/* ---------- 10 gsap demo ---------- */
+.tiles { position: absolute; inset: 80px 60px 110px; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 18px; }
+.tile { border-radius: 14px; background: linear-gradient(135deg, var(--accent), var(--accent-deep)); }
+.tile:nth-child(3n+2) { background: linear-gradient(135deg, #2a2f33, #1c2023); border: 1px solid var(--line-hi); }
+.tile:nth-child(4n) { background: linear-gradient(135deg, #e7fbfd, var(--accent)); }
+
+/* ---------- 11 parallax ---------- */
+#px-scroller { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--accent-deep) transparent; }
+#px-track { position: relative; height: 2600px; }
+.px-layer { position: absolute; left: 0; right: 0; top: 0; will-change: transform; pointer-events: none; }
+.px-blob { position: absolute; border-radius: 50%; filter: blur(50px); opacity: .55; }
+.px-shape { position: absolute; border: 2px solid rgba(92,200,214,.5); border-radius: 18px; }
+.px-shape.round { border-radius: 50%; }
+.px-card { position: absolute; left: 70px; width: 470px; padding: 26px 28px; }
+.px-card .mono { font-size: 15px; color: var(--accent); letter-spacing: 1.5px; }
+.px-card h3 { margin: 8px 0 8px; }
+#px-progress { position: absolute; left: 0; top: 0; height: 4px; width: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); z-index: 3; }
+.px-hint { position: absolute; right: 22px; bottom: 18px; z-index: 3; font-family: var(--f-mono); font-size: 14px; color: var(--muted); background: rgba(13,15,17,.8); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); }
+
+/* ---------- scroll car story ---------- */
+#car-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.car-hint { font-size: 15px; color: var(--fg); background: rgba(13,15,17,.78); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); }
+.gear-hud { position: absolute; right: 24px; top: 80px; z-index: 4; padding: 14px 16px; border-radius: 16px; background: rgba(11,13,15,.86); border: 1px solid var(--line-hi); opacity: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; font-size: 13px; color: var(--muted); letter-spacing: 1.5px; }
+.gears { position: relative; display: flex; flex-direction: column; }
+.gears span { position: relative; z-index: 1; width: 48px; height: 48px; display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: 26px; color: var(--fg); letter-spacing: 0; }
+#gear-ind { position: absolute; left: 0; top: 0; width: 48px; height: 48px; border-radius: 12px; background: rgba(92,200,214,.28); border: 2px solid var(--accent); }
+.gear-hud .eng { color: var(--accent); opacity: 0; }
+.car-end { position: absolute; left: 0; right: 0; top: 40%; text-align: center; z-index: 4; font-family: var(--f-display); font-size: 44px; font-weight: 700; letter-spacing: -1px; opacity: 0; pointer-events: none; }
+.car-steps { position: absolute; left: 20px; right: 20px; bottom: 18px; z-index: 4; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.car-steps button { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(11,13,15,.82); border: 1px solid var(--line); color: var(--muted); font-size: 16px; cursor: pointer; text-align: left; transition: border-color .2s, color .2s; }
+.car-steps b { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-hi); color: var(--fg); font-size: 14px; flex: none; transition: background .2s; }
+.car-steps button.on { color: var(--fg); border-color: rgba(92,200,214,.4); }
+.car-steps button.on b { background: var(--accent); color: var(--accent-ink); }
+.car-steps button.now { border-color: var(--accent); }
+
+/* ---------- 12 splash + micro ---------- */
+.mini-splash { position: relative; height: 330px; display: grid; place-items: center; overflow: hidden; background: #0e1012; }
+.mini-splash .ms-inner { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.mini-splash .ms-count { font-family: var(--f-mono); font-size: 54px; color: var(--fg); letter-spacing: -1px; }
+.mini-splash .ms-line { width: 280px; height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.mini-splash .ms-line i { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: left; transform: scaleX(.6); }
+.micro-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.micro { padding: 24px; min-height: 250px; display: flex; flex-direction: column; gap: 14px; }
+.micro .arena { flex: 1; display: grid; place-items: center; min-height: 150px; }
+.magnet { padding: 18px 34px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 20px; border: 0; cursor: pointer; }
+.tilt { width: 230px; height: 140px; border-radius: 18px; background: linear-gradient(135deg, #24525c, #151a1d 70%); border: 1px solid var(--line-hi); display: flex; flex-direction: column; justify-content: flex-end; padding: 18px; transform-style: preserve-3d; transition: transform .15s ease-out; box-shadow: 0 30px 60px -30px rgba(0,0,0,.8); }
+.tilt .mono { font-size: 14px; color: var(--accent); }
+
+/* ---------- 13 immersive ideas ---------- */
+.ideas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.idea { padding: 28px 30px 30px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; }
+.idea .stack { font-family: var(--f-mono); font-size: 15px; color: var(--accent); margin-top: auto; padding-top: 10px; }
+.idea svg { color: var(--accent); }
+
+/* ---------- 14 figma pipeline ---------- */
+.fig-flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.fig-flow .glass { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 8px; }
+.fig-flow .num { font-family: var(--f-mono); color: var(--accent); font-size: 15px; }
+.fig-flow h3 { font-size: 26px; }
+.arrow-code { display: grid; grid-template-columns: 1fr 70px 1fr 70px 1fr; align-items: center; gap: 0; }
+.arrow-code .arr { text-align: center; color: var(--accent); font-size: 34px; }
+.arrow-code .lbl { font-family: var(--f-mono); font-size: 14px; color: var(--dim); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+.mini-comp { background: #0d0f11; border: 1px solid var(--line); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px; height: 100%; }
+
+/* ---------- 15 tokens demo ---------- */
+.tok-wrap { display: grid; grid-template-columns: 560px 1fr 520px; gap: 40px; margin-top: 46px; align-items: start; }
+.swatches { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.swatch { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 19px; text-align: left; }
+.swatch i { width: 28px; height: 28px; border-radius: 8px; display: block; flex: none; }
+.swatch[aria-pressed="true"] { border-color: var(--fg); background: var(--surface-hi); }
+.range-row { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.range-row label { display: flex; justify-content: space-between; font-family: var(--f-mono); font-size: 16px; color: var(--muted); }
+.range-row input { width: 100%; accent-color: var(--accent); height: 28px; }
+.ui-sample { --t-accent: #5cc8d6; --t-radius: 14px; padding: 34px; border-radius: calc(var(--t-radius) + 10px); background: #f4f7f7; color: #121517; display: flex; flex-direction: column; gap: 20px; transition: border-radius .25s; }
+.ui-sample .badge { align-self: flex-start; background: color-mix(in srgb, var(--t-accent) 22%, white); color: #10282c; font-family: var(--f-mono); font-size: 14px; padding: 6px 12px; border-radius: var(--t-radius); letter-spacing: .5px; }
+.ui-sample h3 { font-size: 34px; color: #121517; }
+.ui-sample p { font-size: 18px; color: #4a5357; line-height: 1.5; }
+.ui-sample .field { border: 1.5px solid #cfd6d8; border-radius: var(--t-radius); padding: 14px 16px; font-size: 18px; color: #6a7478; background: white; }
+.ui-sample .cta { background: var(--t-accent); color: #0d1416; border-radius: var(--t-radius); padding: 16px; text-align: center; font-weight: 600; font-size: 19px; }
+.ui-sample .meter { height: 10px; border-radius: var(--t-radius); background: #dde3e4; overflow: hidden; }
+.ui-sample .meter i { display: block; height: 100%; width: 68%; background: var(--t-accent); border-radius: var(--t-radius); }
+#tok-json { font-size: 16px; }
+
+/* ---------- 16-17 big list ---------- */
+.biglist { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 34px; flex: 1; min-height: 0; }
+.cat { padding: 26px 28px 20px; display: flex; flex-direction: column; }
+.cat-h { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.cat-h svg { color: var(--accent); }
+.cat-h h3 { font-size: 26px; }
+.cat ol { list-style: none; margin: 0; padding: 0; counter-reset: it var(--start); }
+.cat li { counter-increment: it; display: grid; grid-template-columns: 44px 1fr; font-size: 19px; line-height: 1.4; color: var(--fg); padding: 9.5px 0; border-bottom: 1px solid var(--line); }
+.cat li:last-child { border-bottom: 0; }
+.cat li::before { content: counter(it, decimal-leading-zero); font-family: var(--f-mono); font-size: 14px; color: var(--dim); padding-top: 4px; }
+
+/* ---------- 18 process ---------- */
+.timeline { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; margin-top: 70px; }
+.timeline::before { content: ""; position: absolute; left: 0; right: 0; top: 13px; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-deep)); }
+.tl-step { position: relative; padding-top: 52px; display: flex; flex-direction: column; gap: 10px; }
+.tl-step::before { content: ""; position: absolute; left: 0; top: 4px; width: 20px; height: 20px; border-radius: 6px; background: var(--bg); border: 2px solid var(--accent); }
+.tl-step .num { font-family: var(--f-mono); font-size: 15px; color: var(--accent); }
+.tl-step h3 { font-size: 27px; }
+.tl-step .tools-used { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+
+/* ---------- 19 services ---------- */
+.services { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 44px; }
+.svc { padding: 30px 28px; display: flex; flex-direction: column; gap: 14px; }
+.svc h3 { font-size: 29px; }
+.svc ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; }
+.svc li { font-size: 18px; color: var(--muted); padding: 10px 0 10px 26px; border-top: 1px solid var(--line); position: relative; line-height: 1.4; }
+.svc li::before { content: ""; position: absolute; left: 2px; top: 18px; width: 9px; height: 9px; border-radius: 2px; background: var(--accent); }
+.svc .for { font-family: var(--f-mono); font-size: 14px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+
+/* ---------- why a designer ---------- */
+.equation { margin-top: auto; margin-bottom: 44px; display: flex; align-items: center; gap: 22px; }
+.equation span { padding: 18px 28px; border-radius: 16px; border: 1px solid var(--line-hi); background: var(--surface); font-family: var(--f-display); font-size: 28px; letter-spacing: -.5px; }
+.equation i { font-style: normal; font-family: var(--f-display); font-size: 40px; color: var(--accent); }
+.equation .eq-out { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.vs .after .rows b { color: var(--accent); font-weight: 600; }
+
+/* ---------- 20 contact ---------- */
+.contact-row { display: flex; gap: 40px; align-items: center; font-size: 22px; color: var(--fg); flex-wrap: wrap; }
+.contact-row span { display: inline-flex; gap: 12px; align-items: center; }
+.contact-row svg { width: 26px; height: 26px; color: var(--accent); }
+.copy-btn { font-family: var(--f-mono); font-size: 14px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line-hi); background: transparent; cursor: pointer; color: var(--muted); }
+.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ---------- splash ---------- */
+#splash {
+  position: fixed; inset: 0; z-index: 50; background: #0c0e10;
+  display: grid; place-items: center;
+  animation: spFailsafe .5s ease 6s forwards; /* hides the splash even if scripts never load */
+}
+@keyframes spFailsafe { to { opacity: 0; visibility: hidden; } }
+#splash.js-ok { animation: none; }
+#splash .sp-inner { display: flex; flex-direction: column; align-items: center; gap: 26px; }
+#splash .sp-logo { display: flex; align-items: center; gap: 14px; font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 4vw, 48px); letter-spacing: -1.5px; color: var(--fg); }
+#splash .sp-logo .mark { grid-template-columns: repeat(2, 14px); gap: 4px; }
+#splash .sp-logo .mark i { width: 14px; height: 14px; border-radius: 4px; }
+#splash .sp-count { font-family: var(--f-mono); font-size: clamp(14px, 1.4vw, 18px); color: var(--muted); letter-spacing: 3px; text-transform: uppercase; }
+#splash .sp-line { width: min(360px, 70vw); height: 2px; background: rgba(255,255,255,.12); overflow: hidden; border-radius: 2px; }
+#splash .sp-line i { display: block; height: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+#splash .sp-skip { position: absolute; right: max(24px, env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); background: none; border: 1px solid rgba(255,255,255,.2); color: var(--muted); border-radius: 999px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
+
+/* ---------- chrome ---------- */
+#progress { position: fixed; left: 0; top: 0; height: 3px; background: var(--accent); z-index: 20; width: 100%; transform-origin: left; transform: scaleX(0); transition: transform .4s ease; }
+#chrome {
+  position: fixed; z-index: 20;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(19,21,23,.82); backdrop-filter: blur(10px);
+  border: 1px solid var(--line); border-radius: 999px; padding: 5px;
+}
+#chrome button { width: 36px; height: 36px; border-radius: 50%; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; color: var(--fg); }
+#chrome button:hover { background: var(--surface-hi); }
+#chrome button svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#counter { font-family: var(--f-mono); font-size: 13px; color: var(--muted); min-width: 58px; text-align: center; font-variant-numeric: tabular-nums; }
+#rotate-hint { display: none; position: fixed; left: 16px; right: 16px; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 21; text-align: center; font-size: 13px; color: var(--muted); }
+@media (orientation: portrait) and (max-width: 700px) { #rotate-hint { display: block; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide, .slide.is-active { transition: none; }
+  .live-tag::before { animation: none; }
+}
+</style>
+
+<div id="viewport">
+  <div class="deck" id="deck">
+
+    <!-- 1 COVER -->
+    <section class="slide is-active" id="s-cover" data-title="Cover">
+      <div class="s-head"><span></span><span></span></div>
+      <div class="pixels" id="cover-pixels" style="--cols:14; right:0; bottom:0; width:1000px;"></div>
+      <div id="cover-shade" aria-hidden="true"></div>
+      <canvas id="cover-canvas" width="1920" height="1080" aria-label="3D tower. Click floor 18 to go inside."></canvas>
+      <button id="floor-tag" type="button"><b>18</b><span>Click to enter floor 18</span></button>
+      <div id="inside-ui" hidden>
+        <span class="eyebrow">Floor 18 · Design studio</span>
+        <h2>You're inside.</h2>
+        <p class="lead">This is where ideas become interfaces. Let's walk through how we design better products with AI and Figma.</p>
+        <div style="display:flex; gap:14px; flex-wrap:wrap">
+          <button class="btn primary" id="inside-start" type="button">Start the presentation →</button>
+          <button class="btn" id="inside-back" type="button">Back outside</button>
+        </div>
+      </div>
+      <div class="cover-copy">
+        <span class="eyebrow" data-anim>AI-powered UI/UX design</span>
+        <h1 data-anim>Designing Better Products with <span>AI &amp; Figma</span></h1>
+        <p class="lead" data-anim style="font-size:34px; letter-spacing:-1px; color:var(--fg)">Smarter research, faster design systems, interactive prototypes and immersive web</p>
+        <p class="small" data-anim style="font-size:22px; color:var(--fg)">Presented by <b data-brand="presenter">Mahmud Al Islam</b></p>
+      </div>
+      <div class="cover-bottom">
+        <span></span>
+        <div class="wordmark"><span class="mark"><i></i><i></i><i></i><i></i></span><span data-brand="presenter">Mahmud Al Islam</span></div>
+      </div>
+    </section>
+
+    <!-- 2 AGENDA -->
+    <section class="slide" data-title="Agenda">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="margin-top:106px; display:flex; justify-content:space-between; align-items:flex-end; gap:60px">
+        <h2 data-anim style="max-width:900px">What we'll cover today</h2>
+        <p class="body" data-anim style="max-width:620px">How AI helps us design better user experiences, get more out of Figma, and bring new kinds of interfaces to your product.</p>
+      </div>
+      <div class="agenda">
+        <div class="glass" data-anim><span class="num">01</span><h3>AI across the UX process</h3><p class="small">Where AI speeds up research, ideas, wireframes, UI, prototypes and testing.</p></div>
+        <div class="glass" data-anim><span class="num">02</span><h3>Figma, used to its full power</h3><p class="small">Auto layout, components, variables and Figma's own AI features.</p></div>
+        <div class="glass" data-anim><span class="num">03</span><h3>The Figma agent</h3><p class="small">An AI agent that works inside your Figma file with your real design system.</p></div>
+        <div class="glass" data-anim><span class="num">04</span><h3>Design system to code</h3><p class="small">Variables and tokens that keep design and the live product in sync.</p></div>
+        <div class="glass" data-anim><span class="num">05</span><h3>Beyond static screens</h3><p class="small">3D, GSAP motion, parallax, splash screens and scroll stories, shown live.</p></div>
+        <div class="glass" data-anim><span class="num">06</span><h3>What we can do for you</h3><p class="small">48 capabilities, our process, and the packages we offer.</p></div>
+      </div>
+    </section>
+
+    <!-- 3 SHIFT -->
+    <section class="slide" data-title="The AI shift">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 600px 1fr; gap:80px; margin-top:160px; align-items:start">
+        <div style="display:flex; flex-direction:column; gap:26px">
+          <h2 data-anim style="font-size:58px">AI does the busywork. Designers own the experience.</h2>
+          <p class="body" data-anim>AI doesn't replace the designer. It removes the repetitive work, so more time goes into understanding users, testing ideas and polishing details.</p>
+          <p class="body" data-anim>Interfaces that once needed a big team, like animated prototypes and 3D product views, are now within reach of every brand.</p>
+        </div>
+        <div class="vs">
+          <div class="glass" data-anim>
+            <h3>Traditional design</h3>
+            <div class="rows">
+              <div>Hours lost on renaming layers, resizing frames and placeholder content.</div>
+              <div>Research synthesis takes weeks of sticky notes.</div>
+              <div>Static mockups that clients have to imagine in motion.</div>
+              <div>Design and the live product drift apart after handoff.</div>
+            </div>
+          </div>
+          <div class="glass after" data-anim>
+            <h3>AI-assisted design</h3>
+            <div class="rows">
+              <div>AI handles repetitive production, designers make the UX decisions.</div>
+              <div>Interviews and feedback turned into clear insights in days.</div>
+              <div>Clickable, animated prototypes early, so feedback starts sooner.</div>
+              <div>Variables and tokens keep design and code in sync.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span>The AI shift</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 4 AI ACROSS THE UX PROCESS -->
+    <section class="slide" data-title="AI across the UX process">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 900px 1fr; gap:80px; margin-top:100px; align-items:end">
+        <h2 data-anim>Where AI helps across the UX process</h2>
+        <p class="body" data-anim>AI supports every stage, from first research to developer handoff. The designer still makes every decision; AI makes each step faster and better informed.</p>
+      </div>
+      <div class="ux-steps">
+        <div class="glass" data-anim><span class="num">01</span><h3>Research</h3><p class="small">Summarise interviews, reviews and analytics into themes.</p><span class="chip">ChatGPT · Claude</span></div>
+        <div class="glass" data-anim><span class="num">02</span><h3>Define</h3><p class="small">Draft personas, journey maps and problem statements.</p><span class="chip">Claude</span></div>
+        <div class="glass" data-anim><span class="num">03</span><h3>Ideate</h3><p class="small">Explore many layout and flow ideas in minutes.</p><span class="chip">Figma AI</span></div>
+        <div class="glass" data-anim><span class="num">04</span><h3>Wireframe</h3><p class="small">Turn a written flow into first-draft screens.</p><span class="chip">Figma agent</span></div>
+        <div class="glass hl" data-anim><span class="num">05</span><h3>UI design</h3><p class="small">Build screens with your real components and variables.</p><span class="chip on">Figma agent</span></div>
+        <div class="glass" data-anim><span class="num">06</span><h3>Prototype</h3><p class="small">Interactive, animated prototypes from a prompt.</p><span class="chip">Figma Make</span></div>
+        <div class="glass" data-anim><span class="num">07</span><h3>Test &amp; handoff</h3><p class="small">Check accessibility, then hand clean specs and code to developers.</p><span class="chip">Dev Mode · MCP</span></div>
+      </div>
+      <div class="s-foot"><span>AI across the UX process</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 5 RESEARCH -->
+    <section class="slide" data-title="AI for UX research">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 1fr 720px; gap:90px; margin-top:90px; align-items:start">
+        <div style="display:flex; flex-direction:column; gap:22px">
+          <span class="eyebrow" data-anim>Better decisions before pixels</span>
+          <h2 data-anim>AI for UX research &amp; strategy</h2>
+          <p class="body" data-anim>Good UI starts with understanding people. AI helps us read more feedback, find patterns faster, and bring real user evidence into every design decision.</p>
+          <div class="rows" style="margin-top:4px">
+            <div data-anim><div class="row-t" style="font-size:23px">Interview &amp; review synthesis</div><p class="small">Hours of transcripts and app reviews grouped into clear themes.</p></div>
+            <div data-anim><div class="row-t" style="font-size:23px">Personas &amp; journey maps</div><p class="small">Drafted from real data, then refined by the designer.</p></div>
+            <div data-anim><div class="row-t" style="font-size:23px">Competitor UX audits</div><p class="small">Screenshots of rival products compared flow by flow.</p></div>
+            <div data-anim><div class="row-t" style="font-size:23px">UX writing &amp; microcopy</div><p class="small">Clear button labels, error messages and onboarding text in many languages.</p></div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:18px; margin-top:20px">
+          <span class="live-tag" data-anim>Example insight card</span>
+          <div class="glass insight" data-anim>
+            <div class="mono" style="color:var(--accent); font-size:15px; letter-spacing:1.5px">THEME 03 · ONBOARDING</div>
+            <h3>People leave at sign-up before they see any value</h3>
+            <blockquote>"I had to fill in six fields before I even knew what the app does."</blockquote>
+            <div class="ins-meta"><span class="chip">Mentioned in 14 of 22 interviews</span><span class="chip">Sample data</span></div>
+            <div class="ins-rec"><b>Design direction</b><p class="small">Let people try the product first, ask for details later. Cut sign-up to one field.</p></div>
+          </div>
+          <div class="glass insight" data-anim style="opacity:.6; transform:scale(.96); transform-origin:top center; margin-top:-8px">
+            <div class="mono" style="color:var(--accent); font-size:15px; letter-spacing:1.5px">THEME 04 · NAVIGATION</div>
+            <h3 style="font-size:24px">Key settings are hard to find on mobile</h3>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span>AI across the UX process</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 6 FIGMA USED BETTER -->
+    <section class="slide" data-title="Figma, used to its full power">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 560px 1fr; gap:80px; margin-top:90px; flex:1">
+        <div style="display:flex; flex-direction:column; gap:24px">
+          <span class="eyebrow" data-anim>The foundation</span>
+          <h2 data-anim>Figma, used to its full power</h2>
+          <p class="body" data-anim>Most teams use a fraction of Figma. A well-structured file is faster to change, easier to hand off, and it is exactly what AI needs to design with your brand instead of guessing.</p>
+          <p class="body" data-anim>We set up this foundation first on every project.</p>
+        </div>
+        <div class="fig-grid">
+          <div class="glass" data-anim><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg><h3>Auto layout</h3><p class="small">Screens that resize correctly for every device, no manual nudging.</p></div>
+          <div class="glass" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l4 4-4 4-4-4zM12 13l4 4-4 4-4-4zM5 9l3 3-3 3-3-3zM19 9l3 3-3 3-3-3z"/></svg><h3>Components &amp; variants</h3><p class="small">One button, every state. Change it once, it updates everywhere.</p></div>
+          <div class="glass" data-anim><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 3a9 9 0 010 18"/></svg><h3>Variables &amp; modes</h3><p class="small">Colors, spacing and type with light, dark and multi-brand modes.</p></div>
+          <div class="glass" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 5v16M9 7h6"/></svg><h3>Shared libraries</h3><p class="small">One design system used by every designer and every product.</p></div>
+          <div class="glass" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M5 3l14 9-6 1.5L10 20z"/></svg><h3>Advanced prototyping</h3><p class="small">Variables, conditions and smart animate for prototypes that feel real.</p></div>
+          <div class="glass" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg><h3>Dev Mode handoff</h3><p class="small">Specs, assets and code snippets developers can trust.</p></div>
+        </div>
+      </div>
+      <div class="s-foot"><span>Figma</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 7 FIGMA AI -->
+    <section class="slide" data-title="Figma's built-in AI">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:60px; margin-top:80px; margin-bottom:44px">
+        <h2 data-anim style="max-width:900px">Figma's built-in AI features</h2>
+        <p class="body" data-anim style="max-width:640px">Figma now has AI inside the tool. We use these features daily to move faster on the parts of design that don't need a human touch.</p>
+      </div>
+      <div class="ideas">
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg><h3>Figma Make</h3><p class="small">Describe an idea and get a working, interactive prototype to click through and refine.</p><span class="stack">Prompt → prototype</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><h3>First drafts</h3><p class="small">Generate starting layouts from a prompt, then shape them with the design system.</p><span class="stack">Prompt → layout</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7M17 15l2 2 3-4"/></svg><h3>Smart content</h3><p class="small">Rewrite, shorten or translate copy and fill screens with realistic content.</p><span class="stack">Text tools</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h12M3 18h8"/></svg><h3>Rename &amp; organise layers</h3><p class="small">Hundreds of "Frame 2048" layers named properly in one click.</p><span class="stack">File hygiene</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg><h3>AI image tools</h3><p class="small">Generate and edit images, remove backgrounds and boost resolution.</p><span class="stack">Visual assets</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></svg><h3>Visual search</h3><p class="small">Find existing components and screens by image instead of by name.</p><span class="stack">Reuse what exists</span></div>
+      </div>
+      <p class="small" data-anim style="margin-top:22px; color:var(--dim)">Feature names and availability depend on the Figma plan and change over time.</p>
+      <div class="s-foot"><span>Figma</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 8 FIGMA AGENT SESSION -->
+    <section class="slide" data-title="Meet the Figma agent" id="s-loop">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 1fr 900px; gap:70px; margin-top:96px">
+        <div style="display:flex; flex-direction:column; gap:24px">
+          <span class="eyebrow" data-anim>The new way to work</span>
+          <h2 data-anim>Meet the Figma agent</h2>
+          <p class="body" data-anim>An AI agent, such as Claude, connected to your Figma file through Figma's official MCP server. It reads your components and variables, then designs inside the file the way your team would.</p>
+          <p class="body" data-anim>The designer gives direction and reviews every screen.</p>
+        </div>
+        <div class="terminal" data-anim>
+          <div class="bar"><i></i><i></i><i></i><span style="margin-left:10px">Mobile App v2 · Figma agent</span><span style="margin-left:auto">illustrative session</span></div>
+          <div class="screen" id="term">
+            <div><span class="p">&gt;</span> Design a 4-screen onboarding flow with our design system, in light and dark mode</div>
+            <div class="d">● Reading the Figma file · 42 components, 64 variables</div>
+            <div class="d">● Plan: welcome → permissions → profile → done</div>
+            <div class="d">● Building frames with library components and auto layout</div>
+            <div class="d">● Binding colors and spacing to variables, adding dark mode</div>
+            <div class="d">● Checking text contrast against WCAG AA, fixing 2 issues</div>
+            <div><span class="ok">✓</span> 4 screens and a clickable prototype ready for review</div>
+          </div>
+        </div>
+      </div>
+      <div class="steps" style="margin-top:auto; margin-bottom:40px">
+        <div class="glass step" data-anim><span class="num">01</span><h3>Read</h3><p class="small">Learns your components, variables and styles.</p></div>
+        <div class="glass step" data-anim><span class="num">02</span><h3>Plan</h3><p class="small">Proposes the flow and screens for approval.</p></div>
+        <div class="glass step" data-anim><span class="num">03</span><h3>Design</h3><p class="small">Builds real frames, not flat pictures.</p></div>
+        <div class="glass step" data-anim><span class="num">04</span><h3>Check</h3><p class="small">Reviews contrast, spacing and naming.</p></div>
+        <div class="glass step" data-anim><span class="num">05</span><h3>Hand off</h3><p class="small">Prototype, specs and code for developers.</p></div>
+      </div>
+      <div class="s-foot"><span>Figma agent</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 9 FIGMA AGENT CAPABILITIES -->
+    <section class="slide" data-title="What the Figma agent can do">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 1fr 720px; gap:80px; margin-top:60px; align-items:center; flex:1">
+        <div style="display:flex; flex-direction:column; gap:22px">
+          <h2 data-anim>What the Figma agent does for your product</h2>
+          <p class="body" data-anim>It works with what's already in your file, so new screens match your brand from the first draft.</p>
+          <div class="rows powers">
+            <div data-anim><div class="row-t">Reads your design system <span class="mono">READ</span></div><p class="small">Components, variables, styles and existing screens.</p></div>
+            <div data-anim><div class="row-t">Designs new screens <span class="mono">CREATE</span></div><p class="small">Flows built from your real components with auto layout.</p></div>
+            <div data-anim><div class="row-t">Builds the system <span class="mono">SYSTEMISE</span></div><p class="small">Creates components, variants, variables and modes.</p></div>
+            <div data-anim><div class="row-t">Audits quality <span class="mono">AUDIT</span></div><p class="small">Finds detached styles, contrast issues and messy naming.</p></div>
+            <div data-anim><div class="row-t">Connects design and code <span class="mono">SYNC</span></div><p class="small">Turns designs into code, and pushes built pages back into Figma.</p></div>
+          </div>
+        </div>
+        <div class="hexmap" data-anim>
+          <svg class="links" viewBox="0 0 720 720" aria-hidden="true">
+            <g stroke="rgba(255,255,255,.14)" stroke-width="1.5" stroke-dasharray="4 6" fill="none">
+              <circle cx="360" cy="360" r="260"/>
+              <line x1="360" y1="360" x2="360" y2="100"/><line x1="360" y1="360" x2="585" y2="230"/><line x1="360" y1="360" x2="585" y2="490"/>
+              <line x1="360" y1="360" x2="360" y2="620"/><line x1="360" y1="360" x2="135" y2="490"/><line x1="360" y1="360" x2="135" y2="230"/>
+            </g>
+          </svg>
+          <div class="hex" style="left:275px; top:26px"><div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Read file</div></div>
+          <div class="hex" style="left:500px; top:156px"><div><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 6h6M9 18h6"/></svg>Screens</div></div>
+          <div class="hex" style="left:500px; top:416px"><div><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l4 4-4 4-4-4zM12 13l4 4-4 4-4-4zM5 9l3 3-3 3-3-3zM19 9l3 3-3 3-3-3z"/></svg>Components</div></div>
+          <div class="hex" style="left:275px; top:546px"><div><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 3a9 9 0 010 18"/></svg>Variables</div></div>
+          <div class="hex" style="left:50px; top:416px"><div><svg class="ic" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Audit</div></div>
+          <div class="hex" style="left:50px; top:156px"><div><svg class="ic" viewBox="0 0 24 24"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>Code ↔ Design</div></div>
+          <div class="hex core" style="left:245px; top:260px"><div><svg class="ic" viewBox="0 0 24 24"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg>Figma Agent</div></div>
+        </div>
+      </div>
+      <div class="s-foot"><span>Figma agent</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 10 TOOLS LANDSCAPE -->
+    <section class="slide" data-title="AI tools for design">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:60px; margin-top:60px; margin-bottom:36px">
+        <h2 data-anim style="max-width:900px">The AI tools in our design toolkit</h2>
+        <p class="body" data-anim style="max-width:640px">Each tool is strong at a different stage. We pick the right one for each job instead of forcing one tool to do everything.</p>
+      </div>
+      <div class="tools tools-4">
+        <div class="glass tool" data-anim><div class="top"><h3>ChatGPT</h3><span class="maker">OpenAI</span></div>
+          <dl class="kv"><dt>Best for</dt><dd>Research summaries, personas, UX copy, mood images.</dd><dt>Limit</dt><dd>Can't see or edit your Figma file.</dd></dl></div>
+        <div class="glass tool" data-anim><div class="top"><h3>Google AI Studio</h3><span class="maker">Google</span></div>
+          <dl class="kv"><dt>Best for</dt><dd>Reviewing screenshots and videos, testing AI features.</dd><dt>Limit</dt><dd>Built for experiments, not design files.</dd></dl></div>
+        <div class="glass tool" data-anim><div class="top"><h3>Figma AI &amp; Make</h3><span class="maker">Figma</span></div>
+          <dl class="kv"><dt>Best for</dt><dd>First drafts, content, prompt-to-prototype.</dd><dt>Limit</dt><dd>Prototypes, not a full product build.</dd></dl></div>
+        <div class="glass tool hl" data-anim><div class="top"><h3>Figma agent</h3><span class="maker">via MCP</span></div>
+          <dl class="kv"><dt>Best for</dt><dd>Real screens with your components and variables, audits.</dd><dt>Limit</dt><dd>Works best on a well-structured file.</dd></dl></div>
+        <div class="glass tool" data-anim><div class="top"><h3>Lovable</h3><span class="maker">Lovable</span></div>
+          <dl class="kv"><dt>Best for</dt><dd>Turning an idea into a working MVP to validate fast.</dd><dt>Limit</dt><dd>Less control over custom design detail.</dd></dl></div>
+        <div class="glass tool" data-anim><div class="top"><h3>Bolt.new</h3><span class="maker">StackBlitz</span></div>
+          <dl class="kv"><dt>Best for</dt><dd>Instant coded prototypes in the browser.</dd><dt>Limit</dt><dd>Gets harder as projects grow.</dd></dl></div>
+        <div class="glass tool" data-anim><div class="top"><h3>Replit</h3><span class="maker">Replit</span></div>
+          <dl class="kv"><dt>Best for</dt><dd>Build, share and host a prototype in one place.</dd><dt>Limit</dt><dd>Tied to its cloud environment.</dd></dl></div>
+        <div class="glass tool" data-anim><div class="top"><h3>Claude Code</h3><span class="maker">Anthropic</span></div>
+          <dl class="kv"><dt>Best for</dt><dd>Turning designs into production code with 3D and motion.</dd><dt>Limit</dt><dd>Needs experienced people to steer.</dd></dl></div>
+      </div>
+      <div class="s-foot"><span>AI toolkit</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 11 PIPELINE -->
+    <section class="slide" data-title="How we combine them">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 820px 1fr; gap:80px; margin-top:120px; align-items:end">
+        <h2 data-anim>How we combine the tools into one design workflow</h2>
+        <p class="body" data-anim>Fast tools to explore, Figma as the single source of truth, and an agent to build and keep everything consistent. You get speed early and quality at launch.</p>
+      </div>
+      <div class="flowline" id="flowline" style="margin-top:80px"></div>
+      <div class="flow">
+        <div class="stage" data-anim><span class="num">01</span><h3>Understand</h3><p class="small">Research synthesis, personas, journeys and UX copy.</p><div class="chips"><span class="chip">ChatGPT</span><span class="chip">Google AI Studio</span></div></div>
+        <div class="stage" data-anim><span class="num">02</span><h3>Explore</h3><p class="small">Many directions and quick clickable ideas.</p><div class="chips"><span class="chip">Figma Make</span><span class="chip">Lovable</span><span class="chip">Bolt</span></div></div>
+        <div class="stage main" data-anim><span class="num">03</span><h3>Design system</h3><p class="small">Components, variables and final screens in Figma.</p><div class="chips"><span class="chip on">Figma</span><span class="chip on">Figma agent</span></div></div>
+        <div class="stage" data-anim><span class="num">04</span><h3>Bring it to life</h3><p class="small">Motion, 3D and interactive prototypes.</p><div class="chips"><span class="chip">GSAP</span><span class="chip">Three.js</span><span class="chip">Motion</span></div></div>
+        <div class="stage" data-anim><span class="num">05</span><h3>Build &amp; launch</h3><p class="small">Production code that matches the design exactly.</p><div class="chips"><span class="chip">Claude Code</span><span class="chip">Replit</span></div></div>
+      </div>
+      <div class="s-foot"><span>AI toolkit</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 9 THREE.JS -->
+    <section class="slide" data-title="Three.js & 3D models" id="s-three">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div class="demo-split" style="grid-template-columns: 1fr 960px; margin-bottom:40px">
+        <div style="display:flex; flex-direction:column; gap:24px; padding-top:30px">
+          <span class="eyebrow" data-anim>Beyond static screens · 01</span>
+          <h2 data-anim>Three.js &amp; real-time 3D</h2>
+          <p class="body" data-anim>Three.js draws interactive 3D right in the browser with WebGL. Claude Code writes the scene, lighting, materials and controls, and loads your 3D models (glTF, GLB) from Blender, Spline or a product CAD file.</p>
+          <div class="rows" style="margin-top:6px">
+            <div data-anim><div class="row-t" style="font-size:23px">3D product viewers</div><p class="small">Rotate, zoom and change colors or materials live.</p></div>
+            <div data-anim><div class="row-t" style="font-size:23px">Hero scenes &amp; particles</div><p class="small">Brand worlds that react to the cursor and scroll.</p></div>
+            <div data-anim><div class="row-t" style="font-size:23px">React Three Fiber</div><p class="small">The same power inside React and Next.js apps.</p></div>
+          </div>
+        </div>
+        <div class="demo-box no-swipe" data-anim>
+          <canvas id="three-canvas" width="960" height="760" aria-label="Interactive 3D object, drag to rotate"></canvas>
+          <div class="hud"><span class="live-tag">Live WebGL</span><span class="mono small" style="font-size:15px">drag to rotate</span></div>
+          <div class="ctrl">
+            <button class="btn" data-shape="knot" aria-pressed="true">Torus knot</button>
+            <button class="btn" data-shape="crystal" aria-pressed="false">Crystal</button>
+            <button class="btn" data-shape="rings" aria-pressed="false">Orbit rings</button>
+            <button class="btn" id="wire-btn" aria-pressed="false" style="margin-left:auto">Wireframe</button>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span>Beyond static screens</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 10 GSAP & MOTION -->
+    <section class="slide" data-title="GSAP & Motion" id="s-gsap">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div class="demo-split" style="grid-template-columns: 1fr 820px; margin-bottom:40px">
+        <div style="display:flex; flex-direction:column; gap:22px; padding-top:30px; min-width:0">
+          <span class="eyebrow" data-anim>Beyond static screens · 02</span>
+          <h2 data-anim>GSAP &amp; Motion animation</h2>
+          <p class="body" data-anim>GSAP is the industry standard for timelines, staggers and scroll-linked animation. Motion (formerly Framer Motion) brings the same feel to React components. Claude Code writes both, tuned to your brand's rhythm.</p>
+          <pre class="code" id="gsap-code" data-anim></pre>
+        </div>
+        <div class="demo-box no-swipe" data-anim style="background:radial-gradient(circle at 50% 40%, #1b2a2e, #111416 75%)">
+          <div class="hud"><span class="live-tag">Live GSAP</span><span class="mono small" style="font-size:15px">press a button</span></div>
+          <div class="tiles" id="tiles"></div>
+          <div class="ctrl">
+            <button class="btn" data-gs="stagger" aria-pressed="true">Stagger</button>
+            <button class="btn" data-gs="wave" aria-pressed="false">Grid wave</button>
+            <button class="btn" data-gs="timeline" aria-pressed="false">Timeline</button>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span>Beyond static screens</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 11 PARALLAX: SCROLL CAR STORY -->
+    <section class="slide" data-title="Parallax & scroll stories" id="s-parallax">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div class="demo-split" style="grid-template-columns: 1fr 960px; margin-bottom:40px">
+        <div style="display:flex; flex-direction:column; gap:22px; padding-top:30px; min-width:0">
+          <span class="eyebrow" data-anim>Beyond static screens · 03</span>
+          <h2 data-anim>Scroll-driven storytelling</h2>
+          <p class="body" data-anim>Every scroll moves the story one step forward. The visitor sets the pace, background layers move at different speeds for depth, and a product story plays out like a short film.</p>
+          <pre class="code" data-anim><span class="k">const</span> tl = <span class="n">gsap</span>.<span class="k">timeline</span>({ scrollTrigger: {
+  trigger: <span class="s">".car-story"</span>, pin: <span class="k">true</span>,
+  scrub: <span class="k">true</span>, snap: <span class="n">1</span> / <span class="n">4</span> } });
+
+tl.<span class="k">to</span>(<span class="s">".door"</span>,   { ... }) <span class="c">// 1 door opens</span>
+  .<span class="k">to</span>(<span class="s">".driver"</span>, { ... }) <span class="c">// 2 driver gets in</span>
+  .<span class="k">to</span>(<span class="s">".gear"</span>,   { ... }) <span class="c">// 3 shift to D</span>
+  .<span class="k">to</span>(<span class="s">".car"</span>,    { ... }); <span class="c">// 4 drive away</span></pre>
+        </div>
+        <div class="demo-box no-swipe car-box" id="car-box" data-anim tabindex="0" aria-label="Car story. Scroll down inside this box to play each step.">
+          <svg id="car-svg" viewBox="0 0 960 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="cs-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e2a32"/><stop offset="1" stop-color="#101618"/></linearGradient>
+              <linearGradient id="cs-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8be6f0"/><stop offset=".55" stop-color="#3aa7b6"/><stop offset="1" stop-color="#1e5a68"/></linearGradient>
+              <linearGradient id="cs-beamg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e9fbfd" stop-opacity=".55"/><stop offset="1" stop-color="#e9fbfd" stop-opacity="0"/></linearGradient>
+              <radialGradient id="cs-glow"><stop offset="0" stop-color="#ffd9a0" stop-opacity=".5"/><stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="960" height="560" fill="url(#cs-sky)"/>
+            <circle cx="800" cy="120" r="34" fill="#e9fbfd" opacity=".85"/>
+            <g id="cs-far"></g>
+            <g id="cs-mid"></g>
+            <rect y="556" width="960" height="204" fill="#121719"/>
+            <rect y="556" width="960" height="6" fill="#2a3438"/>
+            <g id="cs-road"></g>
+            <g id="cs-speed" opacity="0" fill="#5cc8d6">
+              <rect x="40" y="520" width="190" height="3" rx="2"/><rect x="120" y="560" width="140" height="3" rx="2"/>
+              <rect x="10" y="600" width="230" height="3" rx="2"/><rect x="150" y="490" width="110" height="3" rx="2"/>
+            </g>
+            <g id="cs-car" transform="translate(220 470)">
+              <g id="cs-car-in">
+                <ellipse cx="236" cy="156" rx="250" ry="12" fill="#000" opacity=".5"/>
+                <polygon id="cs-beam" points="466,64 820,0 820,160 466,86" fill="url(#cs-beamg)" opacity="0"/>
+                <path d="M6,112 L6,78 Q8,60 30,56 L110,52 Q160,8 228,4 L300,4 Q338,6 372,48 L440,58 Q466,64 468,86 L468,112 Z" fill="url(#cs-body)"/>
+                <path d="M122,54 Q166,14 230,10 L296,10 Q330,12 358,52 Z" fill="#0c1a1f" opacity=".72"/>
+                <path d="M216,12 L296,10 Q330,12 354,52 L216,54 Z M216,56 L360,56 Q352,86 344,110 L216,110 Z" fill="#070a0b"/>
+                <path d="M234,20 Q244,14 256,18 L262,108 L236,108 Z" fill="#1b2326"/>
+                <ellipse cx="330" cy="46" rx="5" ry="15" fill="none" stroke="#9fb5bd" stroke-width="4"/>
+                <line x1="331" y1="50" x2="346" y2="74" stroke="#9fb5bd" stroke-width="4"/>
+                <g id="cs-seated" opacity="0">
+                  <path d="M256,44 Q270,38 286,44 L292,104 L254,104 Z" fill="#2f4a52"/>
+                  <line x1="282" y1="54" x2="326" y2="52" stroke="#3b5a63" stroke-width="9" stroke-linecap="round"/>
+                  <circle cx="270" cy="28" r="13" fill="#f0c9a8"/>
+                  <path d="M257,27 Q258,12 272,13 Q284,15 283,26 Q276,19 266,21 Z" fill="#1a1f21"/>
+                </g>
+                <rect x="208" y="10" width="7" height="46" fill="#1e5a68"/>
+                <g id="cs-door">
+                  <path d="M216,12 L296,10 Q330,12 354,52 L216,54 Z" fill="#102229" fill-opacity=".55" stroke="#1e5a68" stroke-width="3"/>
+                  <path d="M216,56 L360,56 Q352,86 344,110 L216,110 Z" fill="url(#cs-body)" stroke="rgba(0,0,0,.25)" stroke-width="1.5"/>
+                  <rect x="230" y="66" width="22" height="4" rx="2" fill="#e9fbfd"/>
+                </g>
+                <line x1="20" y1="76" x2="450" y2="76" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+                <rect id="cs-tail" x="4" y="64" width="10" height="14" rx="3" fill="#ff5a4e" opacity=".35"/>
+                <rect id="cs-head" x="456" y="66" width="12" height="10" rx="3" fill="#e9fbfd" opacity=".4"/>
+                <g transform="translate(104 112)"><circle r="42" fill="#0b0d0e"/><circle r="27" fill="#2b3438"/><g class="cs-spokes" fill="#9fb5bd"><rect x="-3" y="-24" width="6" height="48"/><rect x="-24" y="-3" width="48" height="6"/><rect x="-3" y="-24" width="6" height="48" transform="rotate(45)"/><rect x="-3" y="-24" width="6" height="48" transform="rotate(-45)"/></g><circle r="6" fill="#5cc8d6"/></g>
+                <g transform="translate(372 112)"><circle r="42" fill="#0b0d0e"/><circle r="27" fill="#2b3438"/><g class="cs-spokes" fill="#9fb5bd"><rect x="-3" y="-24" width="6" height="48"/><rect x="-24" y="-3" width="48" height="6"/><rect x="-3" y="-24" width="6" height="48" transform="rotate(45)"/><rect x="-3" y="-24" width="6" height="48" transform="rotate(-45)"/></g><circle r="6" fill="#5cc8d6"/></g>
+              </g>
+            </g>
+            <g id="cs-walker" transform="translate(120 624)">
+              <line id="cs-leg-l" x1="0" y1="-80" x2="0" y2="0" stroke="#2b3f46" stroke-width="13" stroke-linecap="round"/>
+              <line id="cs-leg-r" x1="0" y1="-80" x2="0" y2="0" stroke="#22343a" stroke-width="13" stroke-linecap="round"/>
+              <rect x="-16" y="-150" width="32" height="78" rx="12" fill="#2f4a52"/>
+              <line id="cs-arm" x1="0" y1="-138" x2="6" y2="-94" stroke="#3b5a63" stroke-width="10" stroke-linecap="round"/>
+              <circle cy="-168" r="16" fill="#f0c9a8"/>
+              <path d="M-16,-170 Q-15,-188 2,-187 Q16,-186 16,-172 Q8,-180 -4,-178 Z" fill="#1a1f21"/>
+            </g>
+          </svg>
+          <div class="hud" style="z-index:4"><span class="live-tag">Live scroll story</span><span class="mono small car-hint" id="car-hint">Scroll ↓ inside to open the door</span></div>
+          <div class="gear-hud" id="gear-hud" aria-hidden="true">
+            <div class="mono">GEAR</div>
+            <div class="gears"><i id="gear-ind"></i><span>P</span><span>R</span><span>N</span><span>D</span></div>
+            <div class="mono eng">ENGINE ON</div>
+          </div>
+          <div class="car-end" id="car-end">Gone. Scroll ↑ to replay</div>
+          <div class="car-steps" id="car-steps">
+            <button type="button" data-step="1"><b>1</b>Door opens</button>
+            <button type="button" data-step="2"><b>2</b>Driver gets in</button>
+            <button type="button" data-step="3"><b>3</b>Shift to D</button>
+            <button type="button" data-step="4"><b>4</b>Drive away</button>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span>Beyond static screens</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 12 SPLASH & MICRO -->
+    <section class="slide" data-title="Splash screens & micro-interactions" id="s-splash">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 1fr 1000px; gap:80px; margin-top:70px">
+        <div style="display:flex; flex-direction:column; gap:22px; padding-top:10px">
+          <span class="eyebrow" data-anim>Beyond static screens · 04</span>
+          <h2 data-anim>Splash screens &amp; micro-interactions</h2>
+          <p class="body" data-anim>The first two seconds set the tone. A branded splash screen covers loading of heavy 3D assets, and small interactions make every button and card feel alive.</p>
+          <p class="body" data-anim>This deck opened with one. Press replay to see it again.</p>
+          <div data-anim><button class="btn primary" id="replay-splash">Replay the splash screen</button></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:20px">
+          <div class="glass mini-splash" data-anim>
+            <div class="ms-inner">
+              <div class="wordmark" style="font-size:40px"><span class="mark" style="grid-template-columns:repeat(2,12px); gap:4px"><i style="width:12px;height:12px"></i><i style="width:12px;height:12px"></i><i style="width:12px;height:12px"></i><i style="width:12px;height:12px"></i></span><span data-brand="presenter">Mahmud Al Islam</span></div>
+              <div class="ms-count" id="ms-count">064</div>
+              <div class="ms-line"><i id="ms-line"></i></div>
+            </div>
+            <div class="hud" style="position:absolute; left:22px; top:18px"><span class="live-tag">Loading preview</span></div>
+          </div>
+          <div class="micro-row">
+            <div class="glass micro no-swipe" data-anim><span class="live-tag">Magnetic button</span><div class="arena" id="magnet-arena"><button class="magnet" id="magnet">Start a project</button></div><p class="small">Follows the cursor, then springs back.</p></div>
+            <div class="glass micro no-swipe" data-anim><span class="live-tag">3D tilt card</span><div class="arena" id="tilt-arena" style="perspective:800px"><div class="tilt" id="tilt"><span class="mono">HOVER ME</span><b style="font-size:22px; font-family:var(--f-display)">Product card</b></div></div><p class="small">Tilts toward the cursor with depth.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span>Beyond static screens</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 13 IMMERSIVE IDEAS -->
+    <section class="slide" data-title="Immersive website ideas">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:60px; margin-top:70px; margin-bottom:44px">
+        <h2 data-anim style="max-width:960px">Immersive websites we can build for you</h2>
+        <p class="body" data-anim style="max-width:620px">Each idea mixes the techniques you've just seen. All of them work on phones, load fast, and fall back gracefully on older devices.</p>
+      </div>
+      <div class="ideas">
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg><h3>Scroll-driven 3D story</h3><p class="small">The camera flies through a 3D world as the visitor scrolls, chapter by chapter.</p><span class="stack">Three.js · GSAP ScrollTrigger</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M21 16V8l-9-5-9 5v8l9 5zM3 8l9 5 9-5M12 13v8"/></svg><h3>3D product configurator</h3><p class="small">Customers pick colors, materials and parts on a real-time 3D model.</p><span class="stack">React Three Fiber · glTF models</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/></svg><h3>Shader &amp; particle heroes</h3><p class="small">Living gradients, fluid effects and particle logos that react to the cursor.</p><span class="stack">WebGL shaders · Three.js</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M5 3l14 9-6 1.5L10 20z"/></svg><h3>Cursor-reactive interfaces</h3><p class="small">Magnetic buttons, spotlight reveals and custom cursors with personality.</p><span class="stack">Motion · GSAP</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M3 12h2l2-6 4 14 3-10 2 5h5"/></svg><h3>Audio-reactive visuals</h3><p class="small">Music launches and events where visuals move with the sound.</p><span class="stack">Web Audio API · Three.js</span></div>
+        <div class="glass idea" data-anim><svg class="ic" viewBox="0 0 24 24"><path d="M3 21V9l9-6 9 6v12M9 21v-6h6v6"/></svg><h3>Virtual showroom</h3><p class="small">Walk-through galleries for real estate, art or retail, ready for VR headsets.</p><span class="stack">Three.js · WebXR</span></div>
+      </div>
+      <div class="s-foot"><span>Beyond static screens</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 14 FIGMA PIPELINE -->
+    <section class="slide" data-title="Figma to production">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 900px 1fr; gap:80px; margin-top:70px; align-items:end">
+        <h2 data-anim>From Figma design to production code</h2>
+        <p class="body" data-anim>The Figma agent reads frames, components and variables directly from your file, so the live product uses exactly what was designed. Built pages can also go back into Figma.</p>
+      </div>
+      <div class="fig-flow" style="margin-top:44px">
+        <div class="glass" data-anim><span class="num">01</span><h3>Components</h3><p class="small">Buttons, cards and navs with variants and auto layout.</p></div>
+        <div class="glass" data-anim><span class="num">02</span><h3>Variables</h3><p class="small">Color, spacing, radius and type, with light and dark modes.</p></div>
+        <div class="glass" data-anim><span class="num">03</span><h3>Design tokens</h3><p class="small">Variables exported as tokens: one source of truth.</p></div>
+        <div class="glass" data-anim><span class="num">04</span><h3>Code</h3><p class="small">CSS variables, Tailwind config and typed React components.</p></div>
+        <div class="glass" data-anim><span class="num">05</span><h3>Prototype</h3><p class="small">Clickable, animated prototypes for early client feedback.</p></div>
+      </div>
+      <div class="arrow-code" style="margin-top:44px">
+        <div data-anim><div class="lbl">Figma variable</div><pre class="code">color/brand/500   <span class="s">#5CC8D6</span>
+radius/md         <span class="n">12</span>
+space/lg          <span class="n">32</span>
+mode              <span class="k">light · dark</span></pre></div>
+        <div class="arr" data-anim>→</div>
+        <div data-anim><div class="lbl">Design token (JSON)</div><pre class="code">{ <span class="s">"color"</span>: { <span class="s">"brand"</span>: {
+    <span class="s">"500"</span>: <span class="s">"#5CC8D6"</span> } },
+  <span class="s">"radius"</span>: { <span class="s">"md"</span>: <span class="s">"12px"</span> },
+  <span class="s">"space"</span>:  { <span class="s">"lg"</span>: <span class="s">"32px"</span> } }</pre></div>
+        <div class="arr" data-anim>→</div>
+        <div data-anim><div class="lbl">Production CSS</div><pre class="code"><span class="k">:root</span> {
+  --color-brand-500: <span class="s">#5cc8d6</span>;
+  --radius-md: <span class="n">12px</span>;
+  --space-lg: <span class="n">32px</span>;
+}</pre></div>
+      </div>
+      <div class="s-foot"><span>Figma to production</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 15 TOKENS LIVE -->
+    <section class="slide" data-title="Tokens, live" id="s-tokens">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 900px 1fr; gap:80px; margin-top:70px; align-items:end">
+        <h2 data-anim>Change one token, the whole brand updates</h2>
+        <p class="body" data-anim>Because every component reads from tokens, a rebrand or a dark mode becomes a settings change instead of a redesign. Try it.</p>
+      </div>
+      <div class="tok-wrap">
+        <div class="glass no-swipe" data-anim style="padding:28px; display:flex; flex-direction:column; gap:18px">
+          <span class="live-tag">Brand color token</span>
+          <div class="swatches" id="swatches">
+            <button class="swatch" data-c="#5cc8d6" data-n="Lagoon" aria-pressed="true"><i style="background:#5cc8d6"></i>Lagoon</button>
+            <button class="swatch" data-c="#9d8cff" data-n="Iris" aria-pressed="false"><i style="background:#9d8cff"></i>Iris</button>
+            <button class="swatch" data-c="#f2b45c" data-n="Saffron" aria-pressed="false"><i style="background:#f2b45c"></i>Saffron</button>
+            <button class="swatch" data-c="#ff8270" data-n="Coral" aria-pressed="false"><i style="background:#ff8270"></i>Coral</button>
+          </div>
+          <div class="range-row">
+            <label for="radius-range"><span>radius/md</span><span id="radius-val">14px</span></label>
+            <input type="range" id="radius-range" min="0" max="28" value="14">
+          </div>
+        </div>
+        <div class="ui-sample" id="ui-sample" data-anim>
+          <span class="badge">NEW COLLECTION</span>
+          <h3>Join the launch list</h3>
+          <p>Get early access to the 3D configurator and members-only drops.</p>
+          <div class="field">you@company.com</div>
+          <div class="meter"><i></i></div>
+          <div class="cta">Get early access</div>
+        </div>
+        <div data-anim style="display:flex; flex-direction:column; gap:12px">
+          <span class="live-tag">tokens.json</span>
+          <pre class="code" id="tok-json"></pre>
+        </div>
+      </div>
+      <div class="s-foot"><span>Figma to production</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 16 LIST 1 -->
+    <section class="slide" data-title="48 capabilities, part 1">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:60px; margin-top:44px">
+        <h2 data-anim style="font-size:58px">48 things we can build with AI <span class="accent">(1/2)</span></h2>
+        <p class="body" data-anim style="max-width:520px">The creative side: experiences, design systems and products.</p>
+      </div>
+      <div class="biglist">
+        <div class="glass cat" data-anim><div class="cat-h"><svg class="ic" viewBox="0 0 24 24"><path d="M21 16V8l-9-5-9 5v8l9 5zM3 8l9 5 9-5M12 13v8"/></svg><h3>Web &amp; immersive</h3></div>
+          <ol style="--start:0">
+            <li>Immersive 3D landing pages with Three.js</li>
+            <li>Scroll-driven storytelling sites with GSAP</li>
+            <li>Parallax and layered hero sections</li>
+            <li>Branded splash and loading screens</li>
+            <li>3D product viewers using glTF models</li>
+            <li>WebGL shader backgrounds and particles</li>
+            <li>Page transitions and micro-interactions</li>
+            <li>Interactive data stories and infographics</li>
+          </ol></div>
+        <div class="glass cat" data-anim><div class="cat-h"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 100 6 3 3 0 000-6zM6 9a3 3 0 100 6h3V9zM6 15a3 3 0 103 3v-3zM12 9h3a3 3 0 010 6h-3z"/></svg><h3>Figma &amp; design systems</h3></div>
+          <ol style="--start:8">
+            <li>Figma designs into React, Vue or Svelte code</li>
+            <li>Figma variables into design tokens</li>
+            <li>Reusable component libraries with variants</li>
+            <li>Storybook docs for every component</li>
+            <li>Dark, light and multi-brand theming</li>
+            <li>Accessibility audits and fixes (WCAG)</li>
+            <li>Responsive layouts for every screen size</li>
+            <li>Built screens pushed back into Figma</li>
+          </ol></div>
+        <div class="glass cat" data-anim><div class="cat-h"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><h3>Apps &amp; products</h3></div>
+          <ol style="--start:16">
+            <li>Full-stack web apps (Next.js, Node, Python)</li>
+            <li>SaaS dashboards with login and payments</li>
+            <li>Mobile apps in React Native or Flutter</li>
+            <li>E-commerce stores and checkout flows</li>
+            <li>Admin panels and internal tools</li>
+            <li>APIs and database schemas</li>
+            <li>Browser extensions and desktop apps</li>
+            <li>Clickable prototypes for user testing</li>
+          </ol></div>
+      </div>
+      <div class="s-foot"><span>Capabilities</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 17 LIST 2 -->
+    <section class="slide" data-title="48 capabilities, part 2">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:60px; margin-top:44px">
+        <h2 data-anim style="font-size:58px">48 things we can build with AI <span class="accent">(2/2)</span></h2>
+        <p class="body" data-anim style="max-width:520px">The engine room: AI features, engineering quality and automation.</p>
+      </div>
+      <div class="biglist">
+        <div class="glass cat" data-anim><div class="cat-h"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg><h3>AI &amp; data</h3></div>
+          <ol style="--start:24">
+            <li>AI chatbots and assistants on the Claude API</li>
+            <li>Smart search over company documents</li>
+            <li>AI agents that take actions through tools</li>
+            <li>Data cleanup and analysis scripts</li>
+            <li>Live dashboards and automated reports</li>
+            <li>Content and translation workflows</li>
+            <li>PDF, Excel, Word and slide processing</li>
+            <li>Image and video AI connected via MCP</li>
+          </ol></div>
+        <div class="glass cat" data-anim><div class="cat-h"><svg class="ic" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z"/></svg><h3>Engineering quality</h3></div>
+          <ol style="--start:32">
+            <li>Explain any unfamiliar codebase</li>
+            <li>Large refactors and framework migrations</li>
+            <li>Unit and end-to-end tests (Playwright)</li>
+            <li>Debugging from logs and error traces</li>
+            <li>Code review and security review</li>
+            <li>Commits, branches and pull requests</li>
+            <li>CI/CD pipelines with GitHub Actions</li>
+            <li>Performance and SEO audits with fixes</li>
+          </ol></div>
+        <div class="glass cat" data-anim><div class="cat-h"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><h3>Workflow superpowers</h3></div>
+          <ol style="--start:40">
+            <li>MCP: Figma, GitHub, Notion, Slack, databases</li>
+            <li>Subagents working in parallel</li>
+            <li>Hooks that lint and test after each edit</li>
+            <li>Skills and slash commands for team recipes</li>
+            <li>CLAUDE.md memory for project conventions</li>
+            <li>Plan mode: approve the plan before coding</li>
+            <li>Headless mode and Agent SDK pipelines</li>
+            <li>Browser control to test like a real user</li>
+          </ol></div>
+      </div>
+      <div class="s-foot"><span>Capabilities</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 18 PROCESS -->
+    <section class="slide" data-title="Our process">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 900px 1fr; gap:80px; margin-top:120px; align-items:end">
+        <h2 data-anim>Our design process, from first call to launch</h2>
+        <p class="body" data-anim>AI speeds up every step, and the designer makes every decision. You see real progress from the first week.</p>
+      </div>
+      <div class="timeline">
+        <div class="tl-step" data-anim><span class="num">01</span><h3>Discover</h3><p class="small">Goals, users, competitors and research synthesis.</p><div class="tools-used"><span class="chip">ChatGPT</span><span class="chip">Claude</span></div></div>
+        <div class="tl-step" data-anim><span class="num">02</span><h3>Define</h3><p class="small">Personas, user flows and information architecture.</p><div class="tools-used"><span class="chip">FigJam</span></div></div>
+        <div class="tl-step" data-anim><span class="num">03</span><h3>Design</h3><p class="small">Design system, then UI screens with the Figma agent.</p><div class="tools-used"><span class="chip on">Figma agent</span></div></div>
+        <div class="tl-step" data-anim><span class="num">04</span><h3>Prototype</h3><p class="small">Clickable, animated prototype to test with users.</p><div class="tools-used"><span class="chip">Figma Make</span></div></div>
+        <div class="tl-step" data-anim><span class="num">05</span><h3>Test &amp; refine</h3><p class="small">Usability tests, AI-assisted feedback analysis, fixes.</p><div class="tools-used"><span class="chip">AI analysis</span></div></div>
+        <div class="tl-step" data-anim><span class="num">06</span><h3>Handoff &amp; build</h3><p class="small">Dev Mode specs, tokens, and optional production build.</p><div class="tools-used"><span class="chip">Dev Mode</span><span class="chip">Claude Code</span></div></div>
+      </div>
+      <div class="s-foot"><span>Working together</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 19 SERVICES -->
+    <section class="slide" data-title="What we offer">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 900px 1fr; gap:80px; margin-top:80px; align-items:end">
+        <h2 data-anim>What we can do for you</h2>
+        <p class="body" data-anim>Four starting packages. Each can be combined or shaped around your goals.</p>
+      </div>
+      <div class="services">
+        <div class="glass svc" data-anim><span class="for">For new products</span><h3>AI-assisted UX/UI design</h3><p class="small">From research to polished screens.</p>
+          <ul><li>User research synthesis</li><li>Personas and user flows</li><li>Web and mobile UI in Figma</li><li>Usability testing</li></ul></div>
+        <div class="glass svc" data-anim><span class="for">For growing teams</span><h3>Figma design system</h3><p class="small">One source of truth from Figma to code.</p>
+          <ul><li>Components and variants</li><li>Variables, modes and tokens</li><li>Figma agent setup</li><li>Documentation and training</li></ul></div>
+        <div class="glass svc" data-anim><span class="for">For validation</span><h3>Interactive prototype</h3><p class="small">Test ideas before building them.</p>
+          <ul><li>Clickable, animated flows</li><li>Real content and data</li><li>User testing ready</li><li>Investor demo ready</li></ul></div>
+        <div class="glass svc" data-anim><span class="for">For launches</span><h3>Immersive web experience</h3><p class="small">A website people remember.</p>
+          <ul><li>3D or shader hero scene</li><li>GSAP scroll story</li><li>Branded splash screen</li><li>Built from the Figma design</li></ul></div>
+      </div>
+      <div class="s-foot"><span>Working together</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 19b WHY A DESIGNER -->
+    <section class="slide" data-title="Why you still need a designer">
+      <div class="s-head"><span></span><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+      <div style="display:grid; grid-template-columns: 640px 1fr; gap:80px; margin-top:80px; align-items:start">
+        <div style="display:flex; flex-direction:column; gap:24px">
+          <span class="eyebrow" data-anim>The human side</span>
+          <h2 data-anim style="font-size:62px">AI is the tool. A UI/UX designer makes it work for people.</h2>
+          <p class="body" data-anim>AI can generate a hundred screens in minutes. Knowing which one your users actually need comes from real-life experience, talking to people, and watching them use a product.</p>
+          <p class="body" data-anim>Even with the best AI, a great website or product still needs a designer to guide it.</p>
+        </div>
+        <div class="vs">
+          <div class="glass" data-anim>
+            <h3>What AI does well</h3>
+            <div class="rows">
+              <div>Produces layouts, variations and content fast.</div>
+              <div>Handles repetitive work like resizing and naming.</div>
+              <div>Summarises large amounts of feedback.</div>
+              <div>Turns a finished design into code.</div>
+            </div>
+          </div>
+          <div class="glass after" data-anim>
+            <h3>What only a designer brings</h3>
+            <div class="rows">
+              <div><b>Empathy:</b> understands real users' feelings and frustrations.</div>
+              <div><b>Real-life experience:</b> knows what works outside the screen.</div>
+              <div><b>Judgment &amp; taste:</b> picks the right idea, not just many ideas.</div>
+              <div><b>Testing with people:</b> checks the design with real users.</div>
+              <div><b>Business context:</b> connects design to your goals and brand.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="equation" data-anim>
+        <span><b>AI speed</b></span><i>+</i><span><b>Designer experience</b></span><i>=</i><span class="eq-out"><b>Products people love</b></span>
+      </div>
+      <div class="s-foot"><span>The human side</span><span class="pg"></span></div>
+    </section>
+
+    <!-- 20 CONTACT -->
+    <section class="slide" data-title="Contact" id="s-contact">
+      <div class="bars" id="contact-bars" aria-hidden="true"></div>
+      <div class="s-head"><span></span><span></span></div>
+      <div style="margin-top:100px; display:flex; flex-direction:column; gap:30px; max-width:1100px; position:relative; z-index:2">
+        <h1 data-anim style="font-size:96px">Let's build something people remember.</h1>
+        <p class="lead" data-anim style="max-width:820px">Bring us an idea, a Figma file or an existing site. We'll come back with a working prototype and a clear plan.</p>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(3, 340px); gap:0; margin-top:60px; position:relative; z-index:2">
+        <div data-anim style="padding-right:40px"><div class="row-t" style="font-size:22px">1. Discovery call</div><p class="small">30 minutes on goals, audience and references.</p></div>
+        <div data-anim style="padding:0 40px; border-left:1px solid var(--line)"><div class="row-t" style="font-size:22px">2. Concept prototype</div><p class="small">A clickable first look at your experience.</p></div>
+        <div data-anim style="padding-left:40px; border-left:1px solid var(--line)"><div class="row-t" style="font-size:22px">3. Proposal</div><p class="small">Scope, timeline and investment in writing.</p></div>
+      </div>
+      <div style="position:absolute; left:120px; right:120px; bottom:96px; display:flex; justify-content:space-between; align-items:flex-end; z-index:2">
+        <div class="contact-row">
+          <span style="font-size:24px">Thank you.</span>
+        </div>
+        <div class="wordmark" style="font-size:52px"><span class="mark" style="grid-template-columns:repeat(2,16px); gap:5px"><i style="width:16px;height:16px"></i><i style="width:16px;height:16px"></i><i style="width:16px;height:16px"></i><i style="width:16px;height:16px"></i></span><span data-brand="presenter">Mahmud Al Islam</span></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div id="progress"></div>
+<div id="rotate-hint">Rotate your phone for the best view</div>
+<nav id="chrome" aria-label="Slide controls">
+  <button id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <span id="counter">01 / 20</span>
+  <button id="next" aria-label="Next slide"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button id="fs" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</nav>
+
+<div id="splash" aria-hidden="true">
+  <div class="sp-inner">
+    <div class="sp-logo"><span class="mark"><i></i><i></i><i></i><i></i></span><span data-brand="presenter">Mahmud Al Islam</span></div>
+    <div class="sp-line"><i id="sp-line"></i></div>
+    <div class="sp-count"><span id="sp-num">000</span> · Loading experience</div>
+  </div>
+  <button class="sp-skip" id="sp-skip">Skip</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===== Edit your details here: they fill every slide ===== */
+const BRAND = {
+  presenter: "Mahmud Al Islam",
+  year: "2026"
+};
+
+(function () {
+  "use strict";
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hasG = typeof window.gsap !== "undefined";
+  const hasT = typeof window.THREE !== "undefined";
+  if (hasG) gsap.ticker.lagSmoothing(0); /* keep animations on schedule even on slow frames */
+
+  document.querySelectorAll("[data-brand]").forEach(el => {
+    const v = BRAND[el.dataset.brand];
+    if (v) el.textContent = v;
+  });
+
+  /* ---------- scaling ---------- */
+  const deck = document.getElementById("deck");
+  function fit() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    deck.style.transform = "translate(-50%, -50%) scale(" + s + ")";
+  }
+  window.addEventListener("resize", fit);
+  fit();
+
+  /* ---------- slides / navigation ---------- */
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const total = slides.length;
+  const pad = n => String(n).padStart(2, "0");
+  slides.forEach((s, i) => { const pg = s.querySelector(".pg"); if (pg) pg.textContent = pad(i + 1) + " / " + pad(total); });
+  let cur = 0;
+  const counter = document.getElementById("counter");
+  const progress = document.getElementById("progress");
+  const hooks = {};
+
+  function animateIn(slide) {
+    if (!hasG || reduce) return;
+    const items = slide.querySelectorAll("[data-anim]");
+    gsap.killTweensOf(items);
+    gsap.fromTo(items, { y: 34, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.055, overwrite: true, clearProps: "transform,opacity" });
+  }
+  function go(n, opts) {
+    n = Math.max(0, Math.min(total - 1, n));
+    const prev = slides[cur];
+    if (n !== cur || (opts && opts.force)) {
+      prev.classList.remove("is-active");
+      if (hooks[prev.id] && hooks[prev.id].leave) hooks[prev.id].leave();
+      cur = n;
+      const s = slides[cur];
+      s.classList.add("is-active");
+      animateIn(s);
+      if (hooks[s.id] && hooks[s.id].enter) hooks[s.id].enter();
+    }
+    counter.textContent = pad(cur + 1) + " / " + pad(total);
+    progress.style.transform = "scaleX(" + ((cur + 1) / total) + ")";
+    const h = "#slide-" + (cur + 1);
+    if (location.hash !== h) { try { history.replaceState(null, "", h); } catch (e) { location.hash = h; } }
+  }
+  document.getElementById("prev").addEventListener("click", () => go(cur - 1));
+  document.getElementById("next").addEventListener("click", () => go(cur + 1));
+  document.getElementById("fs").addEventListener("click", () => {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    } catch (e) {}
+  });
+  document.addEventListener("keydown", e => {
+    const t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+    else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+    else if (e.key === "Home") go(0);
+    else if (e.key === "End") go(total - 1);
+    else if (e.key === "f" || e.key === "F") document.getElementById("fs").click();
+  });
+  let tx = null, ty = null;
+  document.addEventListener("touchstart", e => {
+    if (e.target.closest(".no-swipe")) { tx = null; return; }
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener("touchend", e => {
+    if (tx === null) return;
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+    tx = null;
+  }, { passive: true });
+  function fromHash() {
+    const m = /^#slide-(\d+)$/.exec(location.hash);
+    if (m) go(parseInt(m[1], 10) - 1);
+  }
+  window.addEventListener("hashchange", fromHash);
+
+  /* ---------- pixel grid (cover) ---------- */
+  const px = document.getElementById("cover-pixels");
+  const cols = 14, rows = 13, cell = 1000 / cols;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const i = document.createElement("i");
+    const d = Math.hypot(cols - 1 - c, rows - 1 - r) / Math.hypot(cols, rows);
+    const o = Math.max(0, 0.72 - d * 1.05) * (0.75 + Math.random() * 0.25);
+    i.style.opacity = o.toFixed(3);
+    i.dataset.o = o.toFixed(3);
+    px.appendChild(i);
+  }
+  px.style.height = (rows * cell) + "px";
+  let pxTween = null;
+  function pxShimmer(on) {
+    if (!hasG || reduce) return;
+    if (on && !pxTween) {
+      pxTween = gsap.to(px.children, {
+        opacity: (i, el) => Math.max(0, parseFloat(el.dataset.o) * (0.55 + Math.random() * 0.7)),
+        duration: 1.8, ease: "sine.inOut", repeat: -1, yoyo: true,
+        stagger: { each: 0.012, from: "end", grid: [rows, cols] }
+      });
+    } else if (!on && pxTween) { pxTween.pause(); pxTween = null; }
+  }
+
+  /* ---------- contact bars ---------- */
+  const bars = document.getElementById("contact-bars");
+  [0.06, 0.1, 0.16, 0.24, 0.34, 0.46].forEach(o => {
+    const i = document.createElement("i");
+    i.style.background = "linear-gradient(180deg, rgba(92,200,214," + o + "), rgba(92,200,214," + (o * 0.15).toFixed(3) + "))";
+    bars.appendChild(i);
+  });
+
+  /* ---------- three.js helpers ---------- */
+  function makeLoop(render) {
+    let id = null;
+    return {
+      start() { if (id === null) { const f = t => { render(t); id = requestAnimationFrame(f); }; id = requestAnimationFrame(f); } },
+      stop() { if (id !== null) { cancelAnimationFrame(id); id = null; } }
+    };
+  }
+  function fallback(canvas, msg) {
+    const d = document.createElement("div"); d.className = "fallback"; d.textContent = msg;
+    canvas.replaceWith(d);
+  }
+
+  /* ---------- cover: 24-floor tower, click floor 18 to enter ---------- */
+  let coverLoop = null;
+  (function towerScene() {
+    const canvas = document.getElementById("cover-canvas");
+    const tag = document.getElementById("floor-tag");
+    const inside = document.getElementById("inside-ui");
+    const copy = document.querySelector("#s-cover .cover-copy");
+    const bottom = document.querySelector("#s-cover .cover-bottom");
+    const shade = document.getElementById("cover-shade");
+    const fail = () => { canvas.remove(); tag.hidden = true; };
+    if (!hasT) { fail(); return; }
+    let renderer;
+    try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
+    catch (e) { fail(); return; }
+    const W = 1920, H = 1080;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setSize(W, H, false);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x131517, 22, 52);
+    const cam = new THREE.PerspectiveCamera(42, W / H, 0.01, 220);
+    const view = { x: -380 };
+    const applyView = () => cam.setViewOffset(W, H, view.x, 0, W, H);
+    applyView();
+
+    scene.add(new THREE.HemisphereLight(0xa8c8d0, 0x0b0d0f, 0.6));
+    const moon = new THREE.DirectionalLight(0xcfe8ff, 0.75); moon.position.set(12, 25, 14); scene.add(moon);
+    const rim = new THREE.DirectionalLight(0x5cc8d6, 0.55); rim.position.set(-15, 10, -10); scene.add(rim);
+
+    const FLOORS = 24, FH = 0.5, TARGET = 17; /* TARGET is floor 18 (zero-based) */
+    const widthFor = i => (i < 6 ? 3.9 : i < 20 ? 3.3 : 2.6);
+
+    function facadeTexture(lit, teal) {
+      const c = document.createElement("canvas"); c.width = 512; c.height = 64;
+      const g = c.getContext("2d");
+      const grad = g.createLinearGradient(0, 0, 0, 64);
+      grad.addColorStop(0, teal ? "#1d5866" : "#16303a"); grad.addColorStop(1, teal ? "#0f3a44" : "#0b171c");
+      g.fillStyle = grad; g.fillRect(0, 0, 512, 64);
+      for (let x = 0; x < 512; x += 32) {
+        const r = Math.random();
+        if (teal) { g.fillStyle = "rgba(127,230,242," + (0.55 + Math.random() * 0.35) + ")"; g.fillRect(x + 3, 6, 26, 52); }
+        else if (r < lit) { g.fillStyle = Math.random() < 0.7 ? "rgba(255,214,160," + (0.45 + Math.random() * 0.4) + ")" : "rgba(127,230,242," + (0.4 + Math.random() * 0.4) + ")"; g.fillRect(x + 3, 6, 26, 52); }
+        else if (r < lit + 0.25) { g.fillStyle = "rgba(92,200,214,0.12)"; g.fillRect(x + 3, 6, 26, 52); }
+        g.fillStyle = "#3a4d54"; g.fillRect(x, 0, 3, 64);
+      }
+      g.fillStyle = "rgba(255,255,255,.07)"; g.fillRect(0, 0, 512, 4);
+      return new THREE.CanvasTexture(c);
+    }
+
+    /* tower */
+    const tower = new THREE.Group(); scene.add(tower);
+    const metal = new THREE.MeshStandardMaterial({ color: 0xc9d3d6, metalness: 0.35, roughness: 0.45 });
+    let target = null, targetMat = null, edgeMat = null;
+    for (let i = 0; i < FLOORS; i++) {
+      const w = widthFor(i), y = i * FH;
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(w + 0.1, FH * 0.12, w + 0.1), metal);
+      slab.position.y = y + FH * 0.06; tower.add(slab);
+      const isT = i === TARGET;
+      const tex = facadeTexture(0.35, isT);
+      const mat = new THREE.MeshStandardMaterial({ map: tex, emissive: isT ? 0x5cc8d6 : 0xffffff, emissiveMap: tex, emissiveIntensity: isT ? 0.6 : 0.85, metalness: 0.55, roughness: 0.2, transparent: isT });
+      const glass = new THREE.Mesh(new THREE.BoxGeometry(w, FH * 0.88, w), mat);
+      glass.position.y = y + FH * 0.56; tower.add(glass);
+      if (isT) {
+        target = glass; targetMat = mat;
+        edgeMat = new THREE.LineBasicMaterial({ color: 0xa6f2fa, transparent: true, opacity: 1 });
+        const edges = new THREE.LineSegments(new THREE.EdgesGeometry(glass.geometry), edgeMat);
+        edges.scale.setScalar(1.004); glass.add(edges);
+      }
+    }
+    [[0, 6], [6, 20], [20, 24]].forEach(([a, b]) => {
+      const w = widthFor(a), h = (b - a) * FH;
+      [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([sx, sz]) => {
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.09, h, 0.09), metal);
+        fin.position.set(sx * w / 2, a * FH + h / 2, sz * w / 2); tower.add(fin);
+      });
+    });
+    const crown = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.6, 1.8), new THREE.MeshStandardMaterial({ color: 0x1a2a30, metalness: 0.7, roughness: 0.3 }));
+    crown.position.y = FLOORS * FH + 0.3; tower.add(crown);
+    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.06, 2.4, 12), metal);
+    spire.position.y = FLOORS * FH + 1.8; tower.add(spire);
+    const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), new THREE.MeshBasicMaterial({ color: 0xff5a4e }));
+    beacon.position.y = FLOORS * FH + 3.05; tower.add(beacon);
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.05, 0.7), new THREE.MeshBasicMaterial({ color: 0x5cc8d6 }));
+    canopy.position.set(0, 0.42, widthFor(0) / 2 + 0.35); tower.add(canopy);
+
+    /* city around it */
+    const cityTex = [facadeTexture(0.3), facadeTexture(0.18), facadeTexture(0.42)];
+    cityTex.forEach(t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, 8); });
+    for (let k = 0; k < 140; k++) {
+      const a = Math.random() * Math.PI * 2, r = 6.5 + Math.random() * 26;
+      const x = Math.cos(a) * r, z = Math.sin(a) * r;
+      if (x * Math.sin(0.42) + z * Math.cos(0.42) > -2.5) continue; /* only buildings behind the tower, so the view stays clear */
+      const h = 1.5 + Math.random() * (r < 13 ? 6 : 10), w = 1.1 + Math.random() * 1.9;
+      const t = cityTex[k % 3];
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), new THREE.MeshStandardMaterial({ color: 0x7f9096, map: t, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.28, metalness: 0.5, roughness: 0.4 }));
+      m.position.set(x, h / 2, z); scene.add(m);
+    }
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(160, 160), new THREE.MeshStandardMaterial({ color: 0x0d1012, roughness: 0.95 }));
+    ground.rotation.x = -Math.PI / 2; scene.add(ground);
+    const grid = new THREE.GridHelper(160, 80, 0x1e5a68, 0x1a2428);
+    grid.material.transparent = true; grid.material.opacity = 0.35; grid.position.y = 0.005; scene.add(grid);
+    const sp = [];
+    for (let k = 0; k < 700; k++) {
+      const th = Math.random() * Math.PI * 2, ph = Math.random() * 1.2, R = 90;
+      sp.push(Math.cos(th) * Math.cos(ph) * R, 8 + Math.sin(ph) * R, Math.sin(th) * Math.cos(ph) * R);
+    }
+    const sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.Float32BufferAttribute(sp, 3));
+    scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xdff6f9, size: 0.25, transparent: true, opacity: 0.7, fog: false })));
+
+    /* floor 18 interior */
+    const fy = TARGET * FH + FH * 0.12, iw = widthFor(TARGET) - 0.12;
+    const inner = new THREE.Group(); inner.visible = false; scene.add(inner);
+    const fl = new THREE.Mesh(new THREE.PlaneGeometry(iw, iw), new THREE.MeshStandardMaterial({ color: 0x1b2124, metalness: 0.2, roughness: 0.7 }));
+    fl.rotation.x = -Math.PI / 2; fl.position.y = fy + 0.002; inner.add(fl);
+    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(iw, iw), new THREE.MeshStandardMaterial({ color: 0x15191b, roughness: 0.8 }));
+    ceil.rotation.x = Math.PI / 2; ceil.position.y = fy + FH * 0.86; inner.add(ceil);
+    const lightMat = new THREE.MeshBasicMaterial({ color: 0xe9fbfd });
+    for (let j = 0; j < 4; j++) {
+      const strip = new THREE.Mesh(new THREE.BoxGeometry(iw * 0.8, 0.006, 0.03), lightMat);
+      strip.position.set(0, fy + FH * 0.855, -1.2 + j * 0.75); inner.add(strip);
+    }
+    const deskMat = new THREE.MeshStandardMaterial({ color: 0xd9e0e2, roughness: 0.5 });
+    const screenMats = [new THREE.MeshBasicMaterial({ color: 0x5cc8d6 }), new THREE.MeshBasicMaterial({ color: 0xe9fbfd }), new THREE.MeshBasicMaterial({ color: 0x9d8cff })];
+    for (let r = 0; r < 2; r++) for (const x of [-1.15, -0.55, 0.55, 1.15]) {
+      const z = -0.2 - r * 0.65, c = x > 0 ? 1 : 0;
+      const desk = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.015, 0.22), deskMat); desk.position.set(x, fy + 0.11, z); inner.add(desk);
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.1, 0.01), deskMat); leg.position.set(x, fy + 0.055, z - 0.1); inner.add(leg);
+      const mon = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 0.008), screenMats[(r + c + 3) % 3]); mon.position.set(x, fy + 0.19, z - 0.07); inner.add(mon);
+    }
+    const sc = document.createElement("canvas"); sc.width = 1536; sc.height = 252;
+    const screenTex = new THREE.CanvasTexture(sc);
+    function drawScreen() {
+      const g = sc.getContext("2d");
+      g.fillStyle = "#0a1418"; g.fillRect(0, 0, sc.width, sc.height);
+      g.fillStyle = "#5cc8d6"; g.font = "500 30px 'JetBrains Mono', Consolas, monospace"; g.fillText("FLOOR 18 · DESIGN STUDIO", 60, 70);
+      g.fillStyle = "#f2f5f5"; g.font = "700 96px Archivo, Arial, sans-serif"; g.fillText("Welcome inside.", 60, 175);
+      g.fillStyle = "#a4adb0"; g.font = "400 30px Inter, Arial, sans-serif"; g.fillText("AI  ·  UI/UX  ·  Figma  ·  " + (BRAND.presenter || ""), 60, 228);
+      screenTex.needsUpdate = true;
+    }
+    drawScreen();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawScreen);
+    const bigScreen = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.262), new THREE.MeshBasicMaterial({ map: screenTex }));
+    bigScreen.position.set(0, fy + 0.25, -iw / 2 + 0.03); inner.add(bigScreen);
+    const roomLight = new THREE.PointLight(0xbfefff, 0.5, 3.5); roomLight.position.set(0, fy + 0.4, -0.6); inner.add(roomLight);
+
+    /* camera states */
+    const st = { a: 0.42, R: 25, y: 7.2, mode: "out" };
+    const ty = TARGET * FH + FH * 0.56, tw = widthFor(TARGET);
+    const lookOut = new THREE.Vector3(0, 7.4, 0);
+    const camPos = new THREE.Vector3(Math.sin(st.a) * st.R, st.y, Math.cos(st.a) * st.R);
+    const look = lookOut.clone(), desired = new THREE.Vector3();
+    let oc = 0, last = 0, hover = false, mx = 0, my = 0;
+    const anchor = new THREE.Vector3(tw / 2, ty, tw / 2);
+    const tmp = new THREE.Vector3();
+
+    document.getElementById("s-cover").addEventListener("pointermove", e => {
+      mx = e.clientX / window.innerWidth - 0.5; my = e.clientY / window.innerHeight - 0.5;
+    });
+    const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+    function hit(e) {
+      const r = canvas.getBoundingClientRect();
+      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, cam);
+      return ray.intersectObject(target, false).length > 0;
+    }
+    canvas.addEventListener("pointermove", e => {
+      if (st.mode !== "out") return;
+      hover = hit(e); canvas.style.cursor = hover ? "pointer" : "";
+      tag.classList.toggle("hot", hover);
+    });
+    canvas.addEventListener("click", e => { if (st.mode === "out" && hit(e)) enter(); });
+    tag.addEventListener("click", enter);
+    tag.addEventListener("pointerenter", () => { hover = true; });
+    tag.addEventListener("pointerleave", () => { hover = false; });
+    document.getElementById("inside-back").addEventListener("click", exit);
+    document.getElementById("inside-start").addEventListener("click", () => go(1));
+
+    function fadeOutside(to, d) {
+      if (!hasG) { [copy, bottom].forEach(el => { el.style.opacity = to; }); px.style.opacity = to ? "" : 0; return; }
+      gsap.to([copy, bottom], { opacity: to, duration: d });
+      gsap.to(px, { opacity: to ? 0.55 : 0, duration: d });
+      gsap.to(shade, { opacity: to, duration: d });
+    }
+    function enter() {
+      if (st.mode !== "out") return;
+      st.mode = "anim"; tag.hidden = true; canvas.style.cursor = "";
+      const d = reduce ? 0.02 : 1;
+      if (!hasG) {
+        view.x = 0; applyView(); inner.visible = true; targetMat.opacity = 0.05; edgeMat.opacity = 0;
+        camPos.set(0, fy + 0.13, tw / 2 - 0.5); look.set(0, fy + 0.22, -tw / 2); cam.fov = 62; cam.updateProjectionMatrix();
+        fadeOutside(0, 0); st.mode = "in"; inside.hidden = false; return;
+      }
+      fadeOutside(0, 0.5 * d);
+      gsap.timeline({ onComplete: () => { st.mode = "in"; inside.hidden = false; gsap.fromTo(inside, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6 * d, ease: "power3.out" }); } })
+        .to(view, { x: 0, duration: 1.7 * d, ease: "power2.inOut", onUpdate: applyView }, 0)
+        .to(camPos, { x: 0, y: ty + 0.05, z: tw / 2 + 2.6, duration: 1.7 * d, ease: "power2.inOut" }, 0)
+        .to(look, { x: 0, y: ty, z: 0, duration: 1.7 * d, ease: "power2.inOut" }, 0)
+        .add(() => { inner.visible = true; }, 1.45 * d)
+        .to(targetMat, { opacity: 0.05, duration: 0.6 * d }, 1.45 * d)
+        .to(edgeMat, { opacity: 0, duration: 0.6 * d }, 1.45 * d)
+        .to(camPos, { y: fy + 0.13, z: tw / 2 - 0.5, duration: 1.4 * d, ease: "power3.inOut" }, 1.7 * d)
+        .to(look, { y: fy + 0.22, z: -tw / 2, duration: 1.4 * d, ease: "power3.inOut" }, 1.7 * d)
+        .to(cam, { fov: 62, duration: 1.4 * d, ease: "power2.inOut", onUpdate: () => cam.updateProjectionMatrix() }, 1.7 * d);
+    }
+    function exit() {
+      if (st.mode !== "in") return;
+      st.mode = "anim";
+      const d = reduce ? 0.02 : 1;
+      const a = st.a + Math.sin(oc * 0.15) * 0.28;
+      const outPos = new THREE.Vector3(Math.sin(a) * st.R, st.y, Math.cos(a) * st.R);
+      const done = () => { st.mode = "out"; tag.hidden = false; };
+      if (!hasG) {
+        inside.hidden = true; inner.visible = false; targetMat.opacity = 1; edgeMat.opacity = 1;
+        view.x = -380; applyView(); cam.fov = 42; cam.updateProjectionMatrix(); camPos.copy(outPos); look.copy(lookOut);
+        fadeOutside(1, 0); done(); return;
+      }
+      gsap.to(inside, { opacity: 0, duration: 0.3 * d, onComplete: () => { inside.hidden = true; } });
+      gsap.timeline({ onComplete: done })
+        .to(camPos, { x: 0, y: ty + 0.05, z: tw / 2 + 2.6, duration: 1.3 * d, ease: "power3.inOut" }, 0)
+        .to(look, { x: 0, y: ty, z: 0, duration: 1.3 * d, ease: "power3.inOut" }, 0)
+        .to(cam, { fov: 42, duration: 1.3 * d, onUpdate: () => cam.updateProjectionMatrix() }, 0)
+        .to(targetMat, { opacity: 1, duration: 0.5 * d }, 0.8 * d)
+        .to(edgeMat, { opacity: 1, duration: 0.5 * d }, 0.8 * d)
+        .add(() => { inner.visible = false; }, 1.3 * d)
+        .to(camPos, { x: outPos.x, y: outPos.y, z: outPos.z, duration: 1.7 * d, ease: "power2.inOut" }, 1.3 * d)
+        .to(look, { x: lookOut.x, y: lookOut.y, z: lookOut.z, duration: 1.7 * d, ease: "power2.inOut" }, 1.3 * d)
+        .to(view, { x: -380, duration: 1.7 * d, ease: "power2.inOut", onUpdate: applyView }, 1.3 * d)
+        .add(() => fadeOutside(1, 0.6 * d), 2.2 * d);
+    }
+
+    coverLoop = makeLoop(t => {
+      const dt = last ? Math.min(0.05, (t - last) / 1000) : 0; last = t;
+      if (st.mode === "out") {
+        if (!reduce) oc += dt;
+        const a = st.a + Math.sin(oc * 0.15) * 0.28 + mx * 0.22;
+        desired.set(Math.sin(a) * st.R, st.y - my * 1.6, Math.cos(a) * st.R);
+        camPos.lerp(desired, 0.05);
+        look.lerp(lookOut, 0.05);
+        targetMat.emissiveIntensity = (hover ? 1.15 : 0.6) + Math.sin(t * 0.004) * 0.22;
+      } else if (st.mode === "in") {
+        look.x += (mx * 0.9 - look.x) * 0.05;
+        look.y += (fy + 0.22 - my * 0.25 - look.y) * 0.05;
+      }
+      beacon.visible = Math.sin(t * 0.004) > -0.2;
+      cam.position.copy(camPos); cam.lookAt(look);
+      renderer.render(scene, cam);
+      if (st.mode === "out" && !tag.hidden) {
+        tmp.copy(anchor).project(cam);
+        tag.style.left = ((tmp.x + 1) / 2 * W).toFixed(1) + "px";
+        tag.style.top = ((1 - tmp.y) / 2 * H).toFixed(1) + "px";
+      }
+    });
+  })();
+  hooks["s-cover"] = {
+    enter() { coverLoop && coverLoop.start(); pxShimmer(true); },
+    leave() { coverLoop && coverLoop.stop(); pxShimmer(false); }
+  };
+
+  /* ---------- 3D demo ---------- */
+  (function threeDemo() {
+    const canvas = document.getElementById("three-canvas");
+    if (!hasT) { fallback(canvas, "3D preview needs WebGL. Open the deck in Chrome, Edge or Safari."); return; }
+    let renderer;
+    try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
+    catch (e) { fallback(canvas, "3D preview needs WebGL. Open the deck in Chrome, Edge or Safari."); return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(960, 760, false);
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(38, 960 / 760, 0.1, 100);
+    cam.position.set(0, 0, 7);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    const l1 = new THREE.PointLight(0x7fe6f2, 1.6, 30); l1.position.set(4, 3, 5); scene.add(l1);
+    const l2 = new THREE.PointLight(0xffffff, 0.9, 30); l2.position.set(-5, -2, 3); scene.add(l2);
+    const l3 = new THREE.PointLight(0x2b7f8f, 1.2, 30); l3.position.set(0, -4, -3); scene.add(l3);
+
+    const mat = new THREE.MeshStandardMaterial({ color: 0x5cc8d6, metalness: 0.65, roughness: 0.22 });
+    const wmat = new THREE.MeshBasicMaterial({ color: 0xe9fbfd, wireframe: true, transparent: true, opacity: 0.25 });
+    const holder = new THREE.Group(); scene.add(holder);
+    const shapes = {
+      knot: () => new THREE.TorusKnotGeometry(1.25, 0.38, 240, 36),
+      crystal: () => new THREE.IcosahedronGeometry(1.7, 0),
+      rings: null
+    };
+    let wire = false, current = null;
+    function build(name) {
+      while (holder.children.length) {
+        const c = holder.children.pop();
+        c.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+      }
+      const grp = new THREE.Group();
+      if (name === "rings") {
+        [1.9, 1.45, 1.0].forEach((r, i) => {
+          const m = new THREE.Mesh(new THREE.TorusGeometry(r, 0.12, 32, 160), mat);
+          m.rotation.set(i * 0.9, i * 0.6, 0); m.userData.spin = 0.4 + i * 0.3; grp.add(m);
+          const w = new THREE.Mesh(m.geometry, wmat); w.visible = wire; m.add(w);
+        });
+        const s = new THREE.Mesh(new THREE.SphereGeometry(0.45, 48, 48), mat); grp.add(s);
+      } else {
+        const geo = shapes[name]();
+        const m = new THREE.Mesh(geo, name === "crystal" ? new THREE.MeshStandardMaterial({ color: 0x5cc8d6, metalness: 0.4, roughness: 0.15, flatShading: true }) : mat);
+        grp.add(m);
+        const w = new THREE.Mesh(geo, wmat); w.visible = wire; w.scale.setScalar(1.002); grp.add(w);
+      }
+      holder.add(grp); current = name;
+      if (hasG && !reduce) gsap.fromTo(grp.scale, { x: 0.4, y: 0.4, z: 0.4 }, { x: 1, y: 1, z: 1, duration: 0.9, ease: "elastic.out(1, 0.6)" });
+    }
+    build("knot");
+    document.querySelectorAll("[data-shape]").forEach(b => b.addEventListener("click", () => {
+      document.querySelectorAll("[data-shape]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      build(b.dataset.shape);
+    }));
+    document.getElementById("wire-btn").addEventListener("click", e => {
+      wire = !wire; e.currentTarget.setAttribute("aria-pressed", String(wire));
+      holder.traverse(o => { if (o.material === wmat) o.visible = wire; });
+      mat.opacity = wire ? 0.35 : 1; mat.transparent = wire;
+    });
+
+    let rx = 0.3, ry = 0, vx = 0, vy = reduce ? 0 : 0.004, drag = false, lx = 0, ly = 0;
+    canvas.addEventListener("pointerdown", e => { drag = true; lx = e.clientX; ly = e.clientY; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener("pointermove", e => {
+      if (!drag) return;
+      const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY;
+      vy = dx * 0.006; vx = dy * 0.006; ry += vy; rx += vx;
+    });
+    const endDrag = () => { drag = false; };
+    canvas.addEventListener("pointerup", endDrag); canvas.addEventListener("pointercancel", endDrag);
+
+    const loop = makeLoop(t => {
+      if (!drag) { vy += ((reduce ? 0 : 0.004) - vy) * 0.03; vx *= 0.94; ry += vy; rx += vx; }
+      holder.rotation.set(rx, ry, 0);
+      if (current === "rings") holder.children[0] && holder.children[0].children.forEach(m => { if (m.userData.spin) m.rotation.z += m.userData.spin * 0.01; });
+      renderer.render(scene, cam);
+    });
+    hooks["s-three"] = { enter: () => loop.start(), leave: () => loop.stop() };
+  })();
+
+  /* ---------- GSAP demo ---------- */
+  (function gsapDemo() {
+    const wrap = document.getElementById("tiles");
+    for (let i = 0; i < 12; i++) { const t = document.createElement("div"); t.className = "tile"; wrap.appendChild(t); }
+    const tiles = wrap.children;
+    const code = document.getElementById("gsap-code");
+    const snippets = {
+      stagger: '<span class="n">gsap</span>.<span class="k">from</span>(<span class="s">".tile"</span>, {\n  y: <span class="n">60</span>, scale: <span class="n">0.6</span>, opacity: <span class="n">0</span>,\n  stagger: { each: <span class="n">0.05</span>, from: <span class="s">"center"</span> },\n  ease: <span class="s">"back.out(1.7)"</span>\n});',
+      wave: '<span class="n">gsap</span>.<span class="k">to</span>(<span class="s">".tile"</span>, {\n  y: <span class="n">-40</span>, yoyo: <span class="k">true</span>, repeat: <span class="n">1</span>,\n  stagger: { grid: [<span class="n">3</span>, <span class="n">4</span>], from: <span class="s">"start"</span>,\n             each: <span class="n">0.06</span> },\n  ease: <span class="s">"sine.inOut"</span>\n});',
+      timeline: '<span class="k">const</span> tl = <span class="n">gsap</span>.<span class="k">timeline</span>();\ntl.<span class="k">to</span>(<span class="s">".tile"</span>, { rotate: <span class="n">90</span>, stagger: <span class="n">0.03</span> })\n  .<span class="k">to</span>(<span class="s">".tile"</span>, { scale: <span class="n">0.45</span>, borderRadius: <span class="s">"50%"</span> })\n  .<span class="k">to</span>(<span class="s">".tile"</span>, { rotate: <span class="n">0</span>, scale: <span class="n">1</span>,\n                  borderRadius: <span class="n">14</span> });'
+    };
+    function run(kind) {
+      code.innerHTML = snippets[kind];
+      if (!hasG) return;
+      gsap.killTweensOf(tiles);
+      gsap.set(tiles, { clearProps: "all" });
+      const d = reduce ? 0.01 : 1;
+      if (kind === "stagger") gsap.fromTo(tiles, { y: 60, scale: 0.6, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.7 * d, stagger: { each: 0.05 * d, from: "center" }, ease: "back.out(1.7)" });
+      if (kind === "wave") gsap.to(tiles, { y: -40, yoyo: true, repeat: 1, duration: 0.35 * d, stagger: { grid: [3, 4], from: "start", each: 0.06 * d }, ease: "sine.inOut" });
+      if (kind === "timeline") {
+        gsap.timeline({ defaults: { duration: 0.45 * d, ease: "power2.inOut" } })
+          .to(tiles, { rotate: 90, stagger: 0.03 * d })
+          .to(tiles, { scale: 0.45, borderRadius: "50%" })
+          .to(tiles, { rotate: 0, scale: 1, borderRadius: 14 });
+      }
+    }
+    document.querySelectorAll("[data-gs]").forEach(b => b.addEventListener("click", () => {
+      document.querySelectorAll("[data-gs]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      run(b.dataset.gs);
+    }));
+    code.innerHTML = snippets.stagger;
+    hooks["s-gsap"] = { enter: () => setTimeout(() => run(document.querySelector('[data-gs][aria-pressed="true"]').dataset.gs), 350) };
+  })();
+
+  /* ---------- scroll car story: 1 door, 2 driver, 3 gear, 4 drive ---------- */
+  (function carStory() {
+    const box = document.getElementById("car-box");
+    const NS = "http://www.w3.org/2000/svg";
+    const mk = (tag, attrs, parent) => { const el = document.createElementNS(NS, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); parent.appendChild(el); return el; };
+    let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+
+    const far = document.getElementById("cs-far");
+    for (let x = -100; x < 2100;) {
+      const w = 60 + rnd() * 90, h = 90 + rnd() * 190;
+      mk("rect", { x, y: 556 - h, width: w, height: h, fill: rnd() < 0.5 ? "#16272c" : "#1a2d33" }, far);
+      for (let wy = 556 - h + 14; wy < 540; wy += 22) for (let wx = x + 10; wx < x + w - 10; wx += 18)
+        if (rnd() < 0.22) mk("rect", { x: wx, y: wy, width: 7, height: 9, fill: rnd() < 0.7 ? "#ffd9a0" : "#7fe6f2", opacity: 0.45 }, far);
+      x += w + 8 + rnd() * 20;
+    }
+    const mid = document.getElementById("cs-mid");
+    for (let x = 40; x < 2800; x += 240) {
+      mk("circle", { cx: x + 18, cy: 404, r: 70, fill: "url(#cs-glow)" }, mid);
+      mk("rect", { x, y: 400, width: 5, height: 156, fill: "#2a3a40" }, mid);
+      mk("rect", { x, y: 398, width: 24, height: 4, rx: 2, fill: "#2a3a40" }, mid);
+      mk("circle", { cx: x + 22, cy: 404, r: 5, fill: "#ffd9a0" }, mid);
+    }
+    const road = document.getElementById("cs-road");
+    for (let x = -100; x < 3400; x += 140) mk("rect", { x, y: 684, width: 70, height: 6, rx: 3, fill: "#5cc8d6", opacity: 0.35 }, road);
+
+    const hint = document.getElementById("car-hint");
+    const stepBtns = Array.from(document.querySelectorAll("#car-steps button"));
+    const hints = ["Scroll ↓ inside to open the door", "Scroll ↓ : the driver gets in", "Scroll ↓ : shift into D", "Scroll ↓ : drive away", "Scroll ↑ to replay"];
+    let stage = 0;
+    function ui() {
+      hint.textContent = hints[stage];
+      stepBtns.forEach((b, i) => { b.classList.toggle("on", i < stage); b.classList.toggle("now", i === stage - 1); });
+    }
+    if (!hasG) {
+      ui();
+      stepBtns.forEach(b => b.addEventListener("click", () => { stage = +b.dataset.step; ui(); }));
+      return;
+    }
+    const $ = id => document.getElementById(id);
+    const door = $("cs-door"), walker = $("cs-walker"), seated = $("cs-seated"), carIn = $("cs-car-in");
+    const spokes = box.querySelectorAll(".cs-spokes");
+    const tl = gsap.timeline({ paused: true });
+    const mark = n => tl.addLabel("s" + n, tl.duration());
+    mark(0);
+    /* 1 · door opens */
+    tl.to(door, { scaleX: 0.3, skewY: -5, transformOrigin: "100% 50%", duration: 1, ease: "power2.inOut" });
+    mark(1);
+    /* 2 · driver walks over, sits, door closes */
+    tl.to(walker, { x: 470, duration: 1.2, ease: "none" }, "s1")
+      .to($("cs-leg-l"), { rotation: 24, transformOrigin: "50% 0%", duration: 0.2, repeat: 5, yoyo: true, ease: "sine.inOut" }, "s1")
+      .to($("cs-leg-r"), { rotation: -24, transformOrigin: "50% 0%", duration: 0.2, repeat: 5, yoyo: true, ease: "sine.inOut" }, "s1")
+      .to($("cs-arm"), { rotation: -20, transformOrigin: "50% 0%", duration: 0.2, repeat: 5, yoyo: true, ease: "sine.inOut" }, "s1")
+      .to(walker, { x: 500, y: 600, scale: 0.85, opacity: 0, duration: 0.5, ease: "power2.in" })
+      .to(seated, { opacity: 1, duration: 0.4 }, "<0.15")
+      .to(door, { scaleX: 1, skewY: 0, duration: 0.8, ease: "power2.inOut" }, ">-0.05");
+    mark(2);
+    /* 3 · engine on, shift P → D */
+    tl.fromTo("#gear-hud", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" })
+      .to("#gear-ind", { y: 144, duration: 0.9, ease: "steps(3)" })
+      .to(["#cs-head", "#cs-tail"], { opacity: 1, duration: 0.3 }, "<0.1")
+      .to("#cs-beam", { opacity: 1, duration: 0.5 }, "<")
+      .fromTo(carIn, { y: 0 }, { y: -2, duration: 0.06, repeat: 7, yoyo: true, ease: "none" }, "<")
+      .to("#gear-hud .eng", { opacity: 1, duration: 0.3 }, "<");
+    mark(3);
+    /* 4 · drive away with parallax layers */
+    tl.to("#gear-hud", { opacity: 0, duration: 0.3 })
+      .to(spokes, { rotation: 900, transformOrigin: "50% 50%", duration: 1.8, ease: "power2.in" }, "<")
+      .to(carIn, { x: 980, duration: 1.8, ease: "power2.in" }, "<")
+      .to("#cs-far", { x: -70, duration: 1.8, ease: "power2.in" }, "<")
+      .to("#cs-mid", { x: -320, duration: 1.8, ease: "power2.in" }, "<")
+      .to("#cs-road", { x: -900, duration: 1.8, ease: "power2.in" }, "<")
+      .to("#cs-speed", { opacity: 1, x: 300, duration: 0.9, ease: "power1.in" }, "<0.5")
+      .to("#cs-speed", { opacity: 0, x: 700, duration: 0.6 }, ">")
+      .fromTo("#car-end", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, ">-0.2");
+    mark(4);
+
+    function goStage(n) {
+      n = Math.max(0, Math.min(4, n));
+      if (n === stage && n !== 0) return;
+      stage = n; ui();
+      if (reduce) tl.seek("s" + n); else tl.tweenTo("s" + n, { ease: "none" });
+    }
+    let lastWheel = 0;
+    box.addEventListener("wheel", e => {
+      e.preventDefault();
+      const now = performance.now(), fresh = now - lastWheel > 260;
+      lastWheel = now;
+      if (!fresh || Math.abs(e.deltaY) < 2) return;
+      goStage(stage + (e.deltaY > 0 ? 1 : -1));
+    }, { passive: false });
+    let ty0 = null;
+    box.addEventListener("touchstart", e => { ty0 = e.touches[0].clientY; }, { passive: true });
+    box.addEventListener("touchend", e => {
+      if (ty0 === null) return;
+      const dy = ty0 - e.changedTouches[0].clientY; ty0 = null;
+      if (Math.abs(dy) > 40) goStage(stage + (dy > 0 ? 1 : -1));
+    }, { passive: true });
+    stepBtns.forEach(b => b.addEventListener("click", () => goStage(+b.dataset.step === stage ? stage - 1 : +b.dataset.step)));
+    document.addEventListener("keydown", e => {
+      if (!document.getElementById("s-parallax").classList.contains("is-active")) return;
+      if (e.key === "ArrowDown") { e.preventDefault(); goStage(stage + 1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); goStage(stage - 1); }
+    });
+    ui();
+    hooks["s-parallax"] = { enter() { if (stage === 4) { stage = 0; tl.seek(0); ui(); } } };
+  })();
+
+  /* ---------- splash ---------- */
+  const splash = document.getElementById("splash");
+  splash.classList.add("js-ok");
+  const spLine = document.getElementById("sp-line");
+  const spNum = document.getElementById("sp-num");
+  let spTl = null;
+  function hideSplash() {
+    if (spTl) spTl.kill();
+    if (hasG && !reduce) gsap.to(splash, { yPercent: -100, duration: 0.8, ease: "power4.inOut", onComplete: () => { splash.hidden = true; gsap.set(splash, { yPercent: 0 }); } });
+    else splash.hidden = true;
+  }
+  function playSplash(onDone) {
+    splash.hidden = false;
+    if (!hasG || reduce) { setTimeout(() => { splash.hidden = true; onDone && onDone(); }, reduce ? 300 : 3000); return; }
+    const o = { p: 0 };
+    gsap.set(spLine, { scaleX: 0 });
+    gsap.set(splash.querySelector(".sp-logo"), { y: 20, opacity: 0 });
+    spTl = gsap.timeline({ onComplete: () => { hideSplash(); onDone && onDone(); } })
+      .to(splash.querySelector(".sp-logo"), { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" })
+      .to(o, { p: 100, duration: 3.4, ease: "power1.inOut", onUpdate: () => { spNum.textContent = String(Math.round(o.p)).padStart(3, "0"); spLine.style.transform = "scaleX(" + o.p / 100 + ")"; } }, "-=0.2")
+      .to({}, { duration: 0.6 });
+  }
+  document.getElementById("sp-skip").addEventListener("click", () => { hideSplash(); animateIn(slides[cur]); });
+  document.getElementById("replay-splash").addEventListener("click", () => playSplash());
+
+  /* mini splash preview loop */
+  (function miniSplash() {
+    if (!hasG || reduce) return;
+    const n = document.getElementById("ms-count"), l = document.getElementById("ms-line"), o = { p: 0 };
+    gsap.to(o, { p: 100, duration: 2.4, ease: "power2.inOut", repeat: -1, repeatDelay: 0.6, onUpdate: () => { n.textContent = String(Math.round(o.p)).padStart(3, "0"); l.style.transform = "scaleX(" + o.p / 100 + ")"; } });
+  })();
+
+  /* magnetic button + tilt card */
+  (function micro() {
+    const arena = document.getElementById("magnet-arena"), btn = document.getElementById("magnet");
+    arena.addEventListener("pointermove", e => {
+      const r = btn.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const s = deck.getBoundingClientRect().width / 1920;
+      const dx = (e.clientX - cx) / s, dy = (e.clientY - cy) / s;
+      if (hasG) gsap.to(btn, { x: dx * 0.35, y: dy * 0.35, duration: 0.3, ease: "power3.out" });
+    });
+    arena.addEventListener("pointerleave", () => { if (hasG) gsap.to(btn, { x: 0, y: 0, duration: 0.8, ease: "elastic.out(1, 0.35)" }); });
+    const ta = document.getElementById("tilt-arena"), card = document.getElementById("tilt");
+    ta.addEventListener("pointermove", e => {
+      const r = ta.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = "rotateY(" + (x * 26) + "deg) rotateX(" + (-y * 26) + "deg) translateZ(10px)";
+    });
+    ta.addEventListener("pointerleave", () => { card.style.transform = ""; });
+  })();
+
+  /* ---------- tokens demo ---------- */
+  (function tokens() {
+    const sample = document.getElementById("ui-sample");
+    const out = document.getElementById("tok-json");
+    const range = document.getElementById("radius-range");
+    const rv = document.getElementById("radius-val");
+    let color = "#5cc8d6", name = "Lagoon";
+    function render() {
+      const r = range.value;
+      sample.style.setProperty("--t-accent", color);
+      sample.style.setProperty("--t-radius", r + "px");
+      rv.textContent = r + "px";
+      out.innerHTML = '{\n  <span class="s">"color"</span>: {\n    <span class="s">"brand"</span>: {\n      <span class="s">"500"</span>: <span class="s">"' + color.toUpperCase() + '"</span>\n    }\n  },\n  <span class="s">"radius"</span>: {\n    <span class="s">"md"</span>: <span class="s">"' + r + 'px"</span>\n  },\n  <span class="c">// theme: ' + name + '</span>\n}';
+    }
+    document.querySelectorAll(".swatch").forEach(b => b.addEventListener("click", () => {
+      document.querySelectorAll(".swatch").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      color = b.dataset.c; name = b.dataset.n; render();
+      if (hasG && !reduce) gsap.fromTo(sample, { scale: 0.985 }, { scale: 1, duration: 0.4, ease: "back.out(2)" });
+    }));
+    range.addEventListener("input", render);
+    render();
+  })();
+
+  /* ---------- terminal + flowline ---------- */
+  hooks["s-loop"] = {
+    enter() {
+      if (!hasG || reduce) return;
+      gsap.fromTo("#term > div", { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.35, stagger: 0.32, delay: 0.4, ease: "power2.out", clearProps: "all" });
+    }
+  };
+  const flowSlide = document.getElementById("flowline").closest(".slide");
+  flowSlide.id = "s-flow";
+  hooks["s-flow"] = { enter() { if (hasG && !reduce) gsap.fromTo("#flowline", { scaleX: 0 }, { scaleX: 1, duration: 1.4, ease: "power3.inOut", delay: 0.2 }); } };
+
+  /* ---------- copy email ---------- */
+
+  /* ---------- boot ---------- */
+  const startHash = /^#slide-(\d+)$/.exec(location.hash);
+  const startAt = startHash ? parseInt(startHash[1], 10) - 1 : 0;
+  slides.forEach(s => s.classList.remove("is-active"));
+  cur = Math.max(0, Math.min(total - 1, startAt));
+  slides[cur].classList.add("is-active");
+  counter.textContent = pad(cur + 1) + " / " + pad(total);
+  progress.style.transform = "scaleX(" + ((cur + 1) / total) + ")";
+  if (hooks[slides[cur].id] && hooks[slides[cur].id].enter) hooks[slides[cur].id].enter();
+  if (reduce || startHash) { splash.hidden = true; }
+  else playSplash(() => animateIn(slides[cur]));
+})();
+</script>
